@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { loadStats, saveStats, loadLoyaltyCard, saveLoyaltyCard, loadAchievements, saveAchievements } from './services/firebase';
-import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, limit, getCountFromServer, getDoc, doc, where } from 'firebase/firestore';
 import { db } from './services/firebase';
 
 interface GameObject {
@@ -39,8 +39,15 @@ interface Achievement {
   inactiveImage: string;
 }
 
+interface LeaderboardEntry {
+  id: string;
+  name: string;
+  score: number;
+  totalPlayers: number;
+}
+
 // --- Компонент PrizeList для призов ---
-const PrizeList: React.FC<{ setShowGift: (v: boolean) => void, ticketsCount: number, setShowPrize100: (v: boolean) => void }> = ({ setShowGift, ticketsCount, setShowPrize100 }) => {
+const PrizeList: React.FC<{ ticketsCount: number, setShowPrize100: (v: boolean) => void }> = ({ ticketsCount, setShowPrize100 }) => {
   const [copied200, setCopied200] = useState(false);
   const [copied500, setCopied500] = useState(false);
   // Всегда три карточки, неактивные если билетов не хватает
@@ -294,8 +301,7 @@ const GameCanvas: React.FC = () => {
   const lastFpsUpdate = useRef<number>(performance.now());
   const frameCount = useRef<number>(0);
   // useState для загрузки данных
-  const [loading, setLoading] = useState(true);
-  const [leaderboard, setLeaderboard] = useState<{id: string, score: number}[]>([]);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [userPlace, setUserPlace] = useState<number | null>(null);
   // Добавляю состояние для показа страницы приза 100 руб
   const [showPrize100, setShowPrize100] = useState(false);
@@ -1014,22 +1020,22 @@ const GameCanvas: React.FC = () => {
   // useEffect для загрузки данных при монтировании/смене карты
   useEffect(() => {
     async function fetchData() {
-      setLoading(true);
       let card = loyaltyCard;
       if (!card.number) {
-        // Пробуем загрузить карту из localStorage для совместимости (можно убрать позже)
         const saved = localStorage.getItem('loyaltyCard');
         if (saved) card = JSON.parse(saved);
       }
-      let loadedCard = await loadLoyaltyCard(card.number);
+      const loadedCard = await loadLoyaltyCard(card.number);
       if (!loadedCard) {
         await saveLoyaltyCard(card.number, card);
-        loadedCard = card;
+        setLoyaltyCard(card);
+      } else {
+        setLoyaltyCard(loadedCard);
       }
-      setLoyaltyCard(loadedCard);
-      let stats = await loadStats(card.number);
+      
+      const stats = await loadStats(card.number);
       if (!stats) {
-        stats = {
+        const newStats = {
           gamesPlayed: 0,
           totalPlayTime: 0,
           deathsByAnvil: 0,
@@ -1037,15 +1043,19 @@ const GameCanvas: React.FC = () => {
           timeUnderSlowEffect: 0,
           highScore: 0
         };
-        await saveStats(card.number, stats);
+        await saveStats(card.number, newStats);
+        setGameStats(newStats);
+      } else {
+        setGameStats(stats);
       }
-      setGameStats(stats);
-      let ach = await loadAchievements(card.number);
+      
+      const ach = await loadAchievements(card.number);
       if (!ach) {
-        ach = achievements;
-        await saveAchievements(card.number, ach);
+        await saveAchievements(card.number, achievements);
+        setAchievements(achievements);
+      } else {
+        setAchievements(ach);
       }
-      setLoading(false);
     }
     if (loyaltyCard.number) fetchData();
   }, [loyaltyCard.number]);
@@ -1057,29 +1067,33 @@ const GameCanvas: React.FC = () => {
     setLoyaltyCard(newCard);
     localStorage.setItem('loyaltyCard', JSON.stringify(newCard));
     setGameState('menu');
+    
     // Всё остальное — в фоне
     saveLoyaltyCard(cardNumber, newCard);
-    loadStats(cardNumber).then((stats: GameStats | null) => {
-      if (!stats) {
-        stats = {
-          gamesPlayed: 0,
-          totalPlayTime: 0,
-          deathsByAnvil: 0,
-          itemsCaught: {},
-          timeUnderSlowEffect: 0,
-          highScore: 0
-        };
-        saveStats(cardNumber, stats);
-      }
+    
+    const stats = await loadStats(cardNumber);
+    if (!stats) {
+      const newStats = {
+        gamesPlayed: 0,
+        totalPlayTime: 0,
+        deathsByAnvil: 0,
+        itemsCaught: {},
+        timeUnderSlowEffect: 0,
+        highScore: 0
+      };
+      await saveStats(cardNumber, newStats);
+      setGameStats(newStats);
+    } else {
       setGameStats(stats);
-    });
-    loadAchievements(cardNumber).then((ach: Achievement[] | null) => {
-      if (!ach) {
-        ach = achievements;
-        saveAchievements(cardNumber, ach);
-      }
+    }
+    
+    const ach = await loadAchievements(cardNumber);
+    if (!ach) {
+      await saveAchievements(cardNumber, achievements);
+      setAchievements(achievements);
+    } else {
       setAchievements(ach);
-    });
+    }
   };
 
   // handleLogout сбрасывает состояние
@@ -2069,7 +2083,7 @@ const GameCanvas: React.FC = () => {
             Ловите билетики и получайте приятные подарки!
           </div>
         </div>
-        <PrizeList setShowGift={setShowGift} ticketsCount={gameStats.itemsCaught.ticket || 0} setShowPrize100={setShowPrize100} />
+        <PrizeList ticketsCount={gameStats.itemsCaught.ticket || 0} setShowPrize100={setShowPrize100} />
         <button
           onClick={() => {
             handleButtonClick();
@@ -2220,7 +2234,6 @@ const GameCanvas: React.FC = () => {
 
   // --- Страница рейтинга ---
   const renderLeaderboard = () => {
-    const totalPlayers = leaderboard.length;
     return (
       <div style={{
         width: '90%',
@@ -2234,7 +2247,7 @@ const GameCanvas: React.FC = () => {
       }}>
         <h2 style={{ fontSize: '24px', marginBottom: '10px', color: '#fff' }}>Лучшая десятка игроков</h2>
         <div style={{ fontSize: '18px', marginBottom: '20px', color: '#fff' }}>
-          Ваше место {userPlace || '-'} из {totalPlayers}
+          Ваше место {userPlace || '-'} из {leaderboard.length > 0 ? leaderboard[0].totalPlayers : 0}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 30, maxHeight: 320, overflowY: 'auto' }}>
           {leaderboard.map((item, idx) => (
@@ -2276,31 +2289,63 @@ const GameCanvas: React.FC = () => {
 
   useEffect(() => {
     if (gameState === 'leaderboard') {
-      fetchLeaderboard().then(setLeaderboard);
-      if (loyaltyCard.number) fetchUserPlace(loyaltyCard.number).then((place) => setUserPlace(place));
+      fetchLeaderboard().then((data) => {
+        setLeaderboard(data);
+      });
+      if (loyaltyCard.number) {
+        fetchUserPlace(loyaltyCard.number).then((place) => {
+          setUserPlace(place);
+        });
+      }
     }
   }, [gameState, loyaltyCard.number]);
 
-  const fetchLeaderboard = async (): Promise<{id: string, score: number}[]> => {
-    const q = query(collection(db, 'stats'), orderBy('highScore', 'desc'), limit(10));
-    const querySnapshot = await getDocs(q);
-    const leaderboard: {id: string, score: number}[] = [];
-    querySnapshot.forEach(doc => {
-      leaderboard.push({ id: doc.id, score: doc.data().highScore });
-    });
-    return leaderboard;
+  const fetchLeaderboard = async (): Promise<LeaderboardEntry[]> => {
+    try {
+      if (!db) {
+        console.error('Firestore не инициализирован');
+        return [];
+      }
+
+      const statsRef = collection(db, 'stats');
+      const q = query(statsRef, orderBy('highScore', 'desc'), limit(10));
+      const snapshot = await getDocs(q);
+      const totalPlayers = (await getCountFromServer(statsRef)).data().count;
+      
+      return snapshot.docs.map(doc => ({
+        id: doc.id,
+        name: doc.data().name || 'Аноним',
+        score: doc.data().highScore || 0,
+        totalPlayers
+      }));
+    } catch (error) {
+      console.error('Ошибка при загрузке таблицы лидеров:', error);
+      return [];
+    }
   };
 
-  const fetchUserPlace = async (userId: string): Promise<number|null> => {
-    const q = query(collection(db, 'stats'), orderBy('highScore', 'desc'));
-    const querySnapshot = await getDocs(q);
-    let place = 1;
-    let found = false;
-    querySnapshot.forEach(doc => {
-      if (doc.id === userId) found = true;
-      if (!found) place++;
-    });
-    return found ? place : null;
+  const fetchUserPlace = async (userId: string): Promise<number> => {
+    try {
+      if (!db) {
+        console.error('Firestore не инициализирован');
+        return 0;
+      }
+
+      const userDoc = await getDoc(doc(db, 'stats', userId));
+      if (!userDoc.exists()) {
+        console.warn('Документ пользователя не найден');
+        return 0;
+      }
+
+      const userScore = userDoc.data().highScore || 0;
+      const statsRef = collection(db, 'stats');
+      const q = query(statsRef, where('highScore', '>', userScore));
+      const snapshot = await getDocs(q);
+      return snapshot.size + 1;
+    } catch (error) {
+      console.error('Ошибка при определении места пользователя:', error);
+      return 0;
+    }
   };
 
   // Добавляю useEffect для отправки данных только при завершении игры
@@ -2458,10 +2503,10 @@ const GameCanvas: React.FC = () => {
   };
 
   // Добавляем обработчик авторизации админа
-  const handleAdminAuth = () => {
+  const handleAdminAuth = async () => {
     if (adminPassword === 'yourpassword') {
       setIsAdminAuthorized(true);
-      loadAdminStats();
+      await loadAdminStats(); // Загружаем данные только после успешной авторизации
     } else {
       alert('Неверный пароль');
     }
@@ -2595,6 +2640,8 @@ const GameCanvas: React.FC = () => {
   useEffect(() => {
     if (window.location.pathname === '/stats') {
       setGameState('adminStats');
+      // Не загружаем данные сразу, ждем авторизации
+      setIsAdminAuthorized(false);
     }
   }, []);
 
