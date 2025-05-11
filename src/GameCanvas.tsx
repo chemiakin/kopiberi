@@ -882,7 +882,7 @@ const GameCanvas: React.FC = () => {
         const basketHeight = 80 * basketScale * (shieldEffect ? 1.5 : 1);
         ctx.save();
         const basketCenterX = basketX + basketWidth / 2;
-        const basketY = dimensions.height - basketHeight - 20;
+        const basketY = dimensions.height - basketHeight - 40;
         ctx.translate(basketCenterX, basketY + basketHeight / 2);
         ctx.rotate(basketTilt);
         ctx.drawImage(
@@ -1115,7 +1115,7 @@ const GameCanvas: React.FC = () => {
   const handleCollision = (obj: GameObject) => {
     const item = itemsInfo.find(i => i.type === obj.type);
     const basketCenterX = basketX + 50 * basketScale;
-    const basketY = dimensions.height - 80 * basketScale - 20;
+    const basketY = dimensions.height - 80 * basketScale - 40;
     if (item) {
       if (item.floatText) {
         setFloatingText({ text: item.floatText, x: basketCenterX, y: basketY, opacity: 1 });
