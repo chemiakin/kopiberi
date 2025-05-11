@@ -13,7 +13,7 @@ interface GameObject {
   id: string;
 }
 
-type GameState = 'menu' | 'playing' | 'result' | 'profile' | 'auth' | 'stats' | 'achievements' | 'prizes' | 'howtoplay' | 'prizeinfo' | 'leaderboard' | 'adminStats';
+type GameStateType = 'playing' | 'menu' | 'result' | 'profile' | 'auth' | 'stats' | 'prizes' | 'howtoplay' | 'prizeinfo' | 'leaderboard' | 'adminStats';
 
 interface LoyaltyCard {
   number: string;
@@ -211,7 +211,7 @@ const GameCanvas: React.FC = () => {
   const lastPointerX = useRef<number>(0);
   const lastFrameTime = useRef<number>(0);
   const gameObjectsRef = useRef<GameObject[]>([]);
-  const [gameState, setGameState] = useState<GameState>(() => {
+  const [gameState, setGameState] = useState<GameStateType>(() => {
     const savedCard = localStorage.getItem('loyaltyCard');
     return savedCard ? 'menu' : 'auth';
   });
@@ -2035,6 +2035,21 @@ const GameCanvas: React.FC = () => {
           <p key={type}>{type}: {count}</p>
         ))}
       </div>
+
+      <h2 style={{ fontSize: 'clamp(24px, 5vw, 32px)', marginTop: '40px', marginBottom: '20px', color: '#111' }}>
+        Общая статистика
+      </h2>
+      <div style={{ textAlign: 'left', marginBottom: '20px', color: '#111' }}>
+        <p>Всего игроков: {adminStats.totalPlayers}</p>
+        <p>Всего игр: {adminStats.totalGames}</p>
+        <p>Общее время в игре: {Math.floor(adminStats.totalStats.totalPlayTime / 1000)} сек</p>
+        <p>Общее время под замедлением: {Math.floor(adminStats.totalStats.timeUnderSlowEffect / 1000)} сек</p>
+        <h3 style={{ marginTop: '20px', color: '#111' }}>Всего поймано предметов:</h3>
+        {Object.entries(adminStats.totalStats.itemsCaught).map(([type, count]) => (
+          <p key={type}>{type}: {count}</p>
+        ))}
+      </div>
+
       <button
         onClick={() => {
           handleButtonClick();
@@ -2645,150 +2660,199 @@ const GameCanvas: React.FC = () => {
     }
   }, []);
 
+  // Добавляем useEffect для загрузки общей статистики
+  useEffect(() => {
+    const loadTotalStats = async () => {
+      try {
+        if (!db) {
+          console.error('Firestore не инициализирован');
+          return;
+        }
+
+        // Получаем все статистики
+        const statsSnapshot = await getDocs(collection(db, 'stats'));
+        let totalGames = 0;
+        const totalStats = {
+          itemsCaught: {} as { [key: string]: number },
+          timeUnderSlowEffect: 0,
+          totalPlayTime: 0
+        };
+        
+        // Создаем промисы для всех операций
+        const statsPromises = statsSnapshot.docs.map(async (doc) => {
+          const data = await doc.data();
+          totalGames += data.gamesPlayed || 0;
+          totalStats.timeUnderSlowEffect += data.timeUnderSlowEffect || 0;
+          totalStats.totalPlayTime += data.totalPlayTime || 0;
+          
+          if (data.itemsCaught) {
+            Object.entries(data.itemsCaught).forEach(([item, count]) => {
+              totalStats.itemsCaught[item] = (totalStats.itemsCaught[item] || 0) + (count as number);
+            });
+          }
+        });
+
+        // Ждем завершения всех операций
+        await Promise.all(statsPromises);
+        
+        setAdminStats(prev => ({
+          ...prev,
+          totalPlayers: statsSnapshot.size,
+          totalGames,
+          totalStats
+        }));
+      } catch (error) {
+        console.error('Ошибка при загрузке общей статистики:', error);
+      }
+    };
+
+    if (gameState === 'stats') {
+      loadTotalStats();
+    }
+  }, [gameState]);
+
   return (
-    <>
-      <div style={{ 
-        position: 'relative', 
-        width: '100%', 
-        height: '100%',
-        fontFamily: '"Pixelify Sans", Arial, sans-serif',
-        background: 'transparent',
-        zIndex: 1
-      }}>
-        {gameState === 'playing' && (
-          <canvas
-            ref={canvasRef}
-            width={dimensions.width}
-            height={dimensions.height}
-            style={{ 
-              display: 'block',
-              width: '100%',
-              height: '100%',
-              background: 'transparent',
-              touchAction: 'none',
-              zIndex: 2,
-              position: 'relative'
-            }}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            onPointerLeave={handlePointerUp}
-          />
-        )}
-        {gameState === 'menu' && (
-          <div style={{
-            zIndex: 3,
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
+    <div style={{ 
+      position: 'relative', 
+      width: '100%', 
+      height: '100vh',
+      fontFamily: '"Pixelify Sans", Arial, sans-serif',
+      background: 'transparent',
+      zIndex: 1
+    }}>
+      {gameState === 'playing' && (
+        <canvas
+          ref={canvasRef}
+          width={dimensions.width}
+          height={dimensions.height}
+          style={{ 
+            display: 'block',
             width: '100%',
-            maxWidth: '800px'
-          }}>{renderMenu()}</div>
-        )}
-        {gameState === 'result' && (
-          <div style={{
-            zIndex: 3,
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '100%',
-            maxWidth: '800px'
-          }}>{showGift ? renderGift() : renderResult()}</div>
-        )}
-        {gameState === 'profile' && (
-          <div style={{
-            zIndex: 3,
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '100%',
-            maxWidth: '800px'
-          }}>{renderProfile()}</div>
-        )}
-        {gameState === 'auth' && (
-          <div style={{
-            zIndex: 3,
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '100%',
-            maxWidth: '800px'
-          }}>{renderAuth()}</div>
-        )}
-        {gameState === 'stats' && (
-          <div style={{
-            zIndex: 3,
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '100%',
-            maxWidth: '800px'
-          }}>{renderStats()}</div>
-        )}
-        {gameState === 'prizes' && (
-          <div style={{
-            zIndex: 3,
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '100%',
-            maxWidth: '800px'
-          }}>{renderPrizes()}</div>
-        )}
-        {gameState === 'howtoplay' && (
-          <div style={{
-            zIndex: 3,
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '100%',
-            maxWidth: '800px'
-          }}>{renderHowToPlay()}</div>
-        )}
-        {gameState === 'prizeinfo' && (
-          <div style={{
-            zIndex: 3,
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '100%',
-            maxWidth: '800px'
-          }}>{renderPrizeInfo()}</div>
-        )}
-        {gameState === 'leaderboard' && (
-          <div style={{
-            zIndex: 3,
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '100%',
-            maxWidth: '800px'
-          }}>{renderLeaderboard()}</div>
-        )}
-        {gameState === 'adminStats' && (
-          <div style={{
-            zIndex: 3,
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '100%',
-            maxWidth: '800px'
-          }}>{renderAdminStats()}</div>
-        )}
-        {renderFloatingText()}
-        {showPrize100 && renderPrize100()}
-      </div>
-    </>
+            height: '100%',
+            background: 'transparent',
+            touchAction: 'none',
+            zIndex: 2,
+            position: 'relative'
+          }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerUp}
+        />
+      )}
+      {gameState === 'menu' && (
+        <div style={{
+          zIndex: 3,
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '100%',
+          maxWidth: '800px'
+        }}>{renderMenu()}</div>
+      )}
+      {gameState === 'result' && (
+        <div style={{
+          zIndex: 3,
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '100%',
+          maxWidth: '800px'
+        }}>{showGift ? renderGift() : renderResult()}</div>
+      )}
+      {gameState === 'profile' && (
+        <div style={{
+          zIndex: 3,
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '100%',
+          maxWidth: '800px'
+        }}>{renderProfile()}</div>
+      )}
+      {gameState === 'auth' && (
+        <div style={{
+          zIndex: 3,
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '100%',
+          maxWidth: '800px'
+        }}>{renderAuth()}</div>
+      )}
+      {gameState === 'stats' && (
+        <div style={{
+          zIndex: 3,
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '100%',
+          maxWidth: '800px'
+        }}>{renderStats()}</div>
+      )}
+      {gameState === 'prizes' && (
+        <div style={{
+          zIndex: 3,
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '100%',
+          maxWidth: '800px'
+        }}>{renderPrizes()}</div>
+      )}
+      {gameState === 'howtoplay' && (
+        <div style={{
+          zIndex: 3,
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '100%',
+          maxWidth: '800px'
+        }}>{renderHowToPlay()}</div>
+      )}
+      {gameState === 'prizeinfo' && (
+        <div style={{
+          zIndex: 3,
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '100%',
+          maxWidth: '800px'
+        }}>{renderPrizeInfo()}</div>
+      )}
+      {gameState === 'leaderboard' && (
+        <div style={{
+          zIndex: 3,
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '100%',
+          maxWidth: '800px'
+        }}>{renderLeaderboard()}</div>
+      )}
+      {gameState === 'adminStats' && (
+        <div style={{
+          zIndex: 3,
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '100%',
+          maxWidth: '800px'
+        }}>{renderAdminStats()}</div>
+      )}
+      {renderFloatingText()}
+      {showPrize100 && renderPrize100()}
+    </div>
   );
 };
 
