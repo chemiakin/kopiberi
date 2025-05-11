@@ -1,130 +1,130 @@
 <?xml version="1.0" encoding="utf-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" width="600" height="600" viewBox="0 0 600 600"><rect width="600" height="600" fill="#ffffff" x="0" y="0"/><g fill="#000000">
-<g transform="translate(240,48) scale(4.12)"><rect width="6" height="6"/></g>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" width="600" height="600" viewBox="0 0 600 600"><rect width="600" height="600" fill="#ffffff" x="0" y="0"/><g fill="#572b10">
+<g transform="translate(240,48) scale(4.12)"><path d="M6,6H0V3c0-1.7,1.3-3,3-3l3,0V6z"/></g>
+<g transform="translate(264,48) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(288,48) scale(4.12)"><rect width="6" height="6"/></g>
 <g transform="translate(312,48) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(336,48) scale(4.12)"><path d="M3,6H0V0l3,0c1.7,0,3,1.3,3,3v0C6,4.7,4.7,6,3,6z"/></g>
 <g transform="translate(240,72) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(288,72) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(312,72) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(240,96) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(288,96) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(312,96) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(264,72) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(240,96) scale(4.12)"><path d="M6,6H3C1.3,6,0,4.7,0,3V0l6,0V6z"/></g>
+<g transform="translate(264,96) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(264,120) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(312,120) scale(4.12)"><path d="M6,6H0V3c0-1.7,1.3-3,3-3l3,0V6z"/></g>
+<g transform="translate(336,120) scale(4.12)"><path d="M3,6H0V0l3,0c1.7,0,3,1.3,3,3v0C6,4.7,4.7,6,3,6z"/></g>
 <g transform="translate(264,144) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(240,168) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(312,144) scale(4.12)"><path d="M3,6L3,6C1.3,6,0,4.7,0,3V0h6v3C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(240,168) scale(4.12)"><path d="M6,6H0V3c0-1.7,1.3-3,3-3l3,0V6z"/></g>
 <g transform="translate(264,168) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(312,168) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(288,168) scale(4.12)"><path d="M6,6H0V0l3,0c1.7,0,3,1.3,3,3V6z"/></g>
+<g transform="translate(336,168) scale(4.12)"><path d="M6,6H0V3c0-1.7,1.3-3,3-3h0c1.7,0,3,1.3,3,3V6z"/></g>
 <g transform="translate(240,192) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(288,192) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(336,192) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(288,192) scale(4.12)"><path d="M3,6L3,6C1.3,6,0,4.7,0,3V0h6v3C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(336,192) scale(4.12)"><path d="M3,6L3,6C1.3,6,0,4.7,0,3V0h6v3C6,4.7,4.7,6,3,6z"/></g>
 <g transform="translate(240,216) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(264,216) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(96,240) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(264,216) scale(4.12)"><path d="M3,6H0V0l3,0c1.7,0,3,1.3,3,3v0C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(96,240) scale(4.12)"><path d="M6,6H3C1.3,6,0,4.7,0,3v0c0-1.7,1.3-3,3-3h3C6,0,6,6,6,6z"/></g>
 <g transform="translate(120,240) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(144,240) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(192,240) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(240,240) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(288,240) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(312,240) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(144,240) scale(4.12)"><path d="M6,6H0V0l3,0c1.7,0,3,1.3,3,3V6z"/></g>
+<g transform="translate(192,240) scale(4.12)"><circle cx="3" cy="3" r="3"/></g>
+<g transform="translate(240,240) scale(4.12)"><path d="M3,6L3,6C1.3,6,0,4.7,0,3V0h6v3C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(312,240) scale(4.12)"><path d="M6,6H0V3c0-1.7,1.3-3,3-3l3,0V6z"/></g>
+<g transform="translate(336,240) scale(4.12)"><rect width="6" height="6"/></g>
 <g transform="translate(360,240) scale(4.12)"><rect width="6" height="6"/></g>
 <g transform="translate(384,240) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(408,240) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(480,240) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(408,240) scale(4.12)"><path d="M3,6H0V0l3,0c1.7,0,3,1.3,3,3v0C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(480,240) scale(4.12)"><path d="M6,6H0V3c0-1.7,1.3-3,3-3l3,0V6z"/></g>
 <g transform="translate(504,240) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(528,240) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(72,264) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(96,264) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(120,264) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(144,264) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(216,264) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(264,264) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(288,264) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(408,264) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(480,264) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(504,264) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(528,264) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(72,288) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(168,288) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(528,240) scale(4.12)"><path d="M3,6H0V0l3,0c1.7,0,3,1.3,3,3v0C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(48,264) scale(4.12)"><path d="M6,6H3C1.3,6,0,4.7,0,3v0c0-1.7,1.3-3,3-3h3C6,0,6,6,6,6z"/></g>
+<g transform="translate(72,264) scale(4.12)"><path d="M3,6H0V0l3,0c1.7,0,3,1.3,3,3v0C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(144,264) scale(4.12)"><path d="M6,6H3C1.3,6,0,4.7,0,3V0l6,0V6z"/></g>
+<g transform="translate(168,264) scale(4.12)"><path d="M6,6H0V0l3,0c1.7,0,3,1.3,3,3V6z"/></g>
+<g transform="translate(312,264) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(336,264) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(360,264) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(480,264) scale(4.12)"><path d="M3,6L3,6C1.3,6,0,4.7,0,3V0h6v3C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(96,288) scale(4.12)"><path d="M6,6H3C1.3,6,0,4.7,0,3v0c0-1.7,1.3-3,3-3h3C6,0,6,6,6,6z"/></g>
+<g transform="translate(120,288) scale(4.12)"><path d="M3,6H0V0l3,0c1.7,0,3,1.3,3,3v0C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(168,288) scale(4.12)"><path d="M6,6H3C1.3,6,0,4.7,0,3V0l6,0V6z"/></g>
 <g transform="translate(192,288) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(216,288) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(240,288) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(264,288) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(288,288) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(312,288) scale(4.12)"><path d="M3,6H0V0l6,0v3C6,4.7,4.7,6,3,6z"/></g>
 <g transform="translate(360,288) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(384,288) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(432,288) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(480,288) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(528,288) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(72,312) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(120,312) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(144,312) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(168,312) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(216,312) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(240,312) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(264,312) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(336,312) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(408,288) scale(4.12)"><circle cx="3" cy="3" r="3"/></g>
+<g transform="translate(456,288) scale(4.12)"><path d="M6,6H0V3c0-1.7,1.3-3,3-3h0c1.7,0,3,1.3,3,3V6z"/></g>
+<g transform="translate(504,288) scale(4.12)"><path d="M6,6H0V3c0-1.7,1.3-3,3-3l3,0V6z"/></g>
+<g transform="translate(528,288) scale(4.12)"><path d="M3,6H0V0l3,0c1.7,0,3,1.3,3,3v0C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(72,312) scale(4.12)"><path d="M6,6H0V3c0-1.7,1.3-3,3-3h0c1.7,0,3,1.3,3,3V6z"/></g>
+<g transform="translate(336,312) scale(4.12)"><path d="M6,6H0V3c0-1.7,1.3-3,3-3l3,0V6z"/></g>
 <g transform="translate(360,312) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(384,312) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(408,312) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(432,312) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(384,312) scale(4.12)"><path d="M3,6H0V0l3,0c1.7,0,3,1.3,3,3v0C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(456,312) scale(4.12)"><rect width="6" height="6"/></g>
 <g transform="translate(480,312) scale(4.12)"><rect width="6" height="6"/></g>
 <g transform="translate(504,312) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(528,312) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(48,336) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(72,336) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(168,336) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(192,336) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(240,336) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(72,336) scale(4.12)"><path d="M3,6L3,6C1.3,6,0,4.7,0,3V0h6v3C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(192,336) scale(4.12)"><path d="M6,6H3C1.3,6,0,4.7,0,3v0c0-1.7,1.3-3,3-3h3C6,0,6,6,6,6z"/></g>
+<g transform="translate(216,336) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(240,336) scale(4.12)"><path d="M6,6H0V0l3,0c1.7,0,3,1.3,3,3V6z"/></g>
+<g transform="translate(288,336) scale(4.12)"><path d="M6,6H3C1.3,6,0,4.7,0,3v0c0-1.7,1.3-3,3-3h3C6,0,6,6,6,6z"/></g>
+<g transform="translate(312,336) scale(4.12)"><rect width="6" height="6"/></g>
 <g transform="translate(336,336) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(432,336) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(480,336) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(504,336) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(240,360) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(312,360) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(336,360) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(360,360) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(456,360) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(264,384) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(312,384) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(336,384) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(360,384) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(384,384) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(408,384) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(360,336) scale(4.12)"><path d="M3,6H0V0l6,0v3C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(408,336) scale(4.12)"><path d="M6,6H0V3c0-1.7,1.3-3,3-3h0c1.7,0,3,1.3,3,3V6z"/></g>
+<g transform="translate(456,336) scale(4.12)"><path d="M3,6L3,6C1.3,6,0,4.7,0,3V0h6v3C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(504,336) scale(4.12)"><path d="M6,6H3C1.3,6,0,4.7,0,3V0l6,0V6z"/></g>
+<g transform="translate(528,336) scale(4.12)"><path d="M3,6H0V0l3,0c1.7,0,3,1.3,3,3v0C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(240,360) scale(4.12)"><path d="M3,6L3,6C1.3,6,0,4.7,0,3V0h6v3C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(312,360) scale(4.12)"><path d="M3,6L3,6C1.3,6,0,4.7,0,3V0h6v3C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(408,360) scale(4.12)"><path d="M3,6L3,6C1.3,6,0,4.7,0,3V0h6v3C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(480,360) scale(4.12)"><path d="M6,6H0V3c0-1.7,1.3-3,3-3h0c1.7,0,3,1.3,3,3V6z"/></g>
+<g transform="translate(360,384) scale(4.12)"><circle cx="3" cy="3" r="3"/></g>
+<g transform="translate(432,384) scale(4.12)"><path d="M6,6H0V3c0-1.7,1.3-3,3-3h0c1.7,0,3,1.3,3,3V6z"/></g>
+<g transform="translate(480,384) scale(4.12)"><path d="M6,6H3C1.3,6,0,4.7,0,3V0l6,0V6z"/></g>
 <g transform="translate(504,384) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(528,384) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(264,408) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(336,408) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(384,408) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(456,408) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(240,432) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(528,384) scale(4.12)"><path d="M6,6H0V0l3,0c1.7,0,3,1.3,3,3V6z"/></g>
+<g transform="translate(288,408) scale(4.12)"><path d="M6,6H0V3c0-1.7,1.3-3,3-3l3,0V6z"/></g>
+<g transform="translate(312,408) scale(4.12)"><path d="M3,6H0V0l3,0c1.7,0,3,1.3,3,3v0C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(384,408) scale(4.12)"><path d="M6,6H0V3c0-1.7,1.3-3,3-3l3,0V6z"/></g>
+<g transform="translate(408,408) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(432,408) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(456,408) scale(4.12)"><path d="M6,6H0V0l3,0c1.7,0,3,1.3,3,3V6z"/></g>
+<g transform="translate(528,408) scale(4.12)"><path d="M3,6L3,6C1.3,6,0,4.7,0,3V0h6v3C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(240,432) scale(4.12)"><path d="M6,6H0V3c0-1.7,1.3-3,3-3l3,0V6z"/></g>
 <g transform="translate(264,432) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(312,432) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(288,432) scale(4.12)"><path d="M3,6H0V0l6,0v3C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(360,432) scale(4.12)"><path d="M6,6H3C1.3,6,0,4.7,0,3v0c0-1.7,1.3-3,3-3h3C6,0,6,6,6,6z"/></g>
 <g transform="translate(384,432) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(408,432) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(480,432) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(432,432) scale(4.12)"><path d="M6,6H3C1.3,6,0,4.7,0,3V0l6,0V6z"/></g>
+<g transform="translate(456,432) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(480,432) scale(4.12)"><path d="M3,6H0V0l3,0c1.7,0,3,1.3,3,3v0C6,4.7,4.7,6,3,6z"/></g>
 <g transform="translate(240,456) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(264,456) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(288,456) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(384,456) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(408,456) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(480,456) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(240,480) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(336,480) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(384,480) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(432,480) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(456,480) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(480,480) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(264,504) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(360,504) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(336,456) scale(4.12)"><circle cx="3" cy="3" r="3"/></g>
+<g transform="translate(384,456) scale(4.12)"><path d="M6,6H3C1.3,6,0,4.7,0,3V0l6,0V6z"/></g>
+<g transform="translate(408,456) scale(4.12)"><path d="M6,6H0V0l3,0c1.7,0,3,1.3,3,3V6z"/></g>
+<g transform="translate(240,480) scale(4.12)"><path d="M6,6H3C1.3,6,0,4.7,0,3V0l6,0V6z"/></g>
+<g transform="translate(264,480) scale(4.12)"><path d="M6,6H0V0l3,0c1.7,0,3,1.3,3,3V6z"/></g>
+<g transform="translate(408,480) scale(4.12)"><rect width="6" height="6"/></g>
+<g transform="translate(456,480) scale(4.12)"><circle cx="3" cy="3" r="3"/></g>
+<g transform="translate(264,504) scale(4.12)"><path d="M6,6H3C1.3,6,0,4.7,0,3V0l6,0V6z"/></g>
+<g transform="translate(288,504) scale(4.12)"><path d="M3,6H0V0l3,0c1.7,0,3,1.3,3,3v0C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(336,504) scale(4.12)"><path d="M6,6H0V3c0-1.7,1.3-3,3-3h0c1.7,0,3,1.3,3,3V6z"/></g>
+<g transform="translate(384,504) scale(4.12)"><path d="M6,6H0V3c0-1.7,1.3-3,3-3l3,0V6z"/></g>
 <g transform="translate(408,504) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(432,504) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(480,504) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(504,504) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(264,528) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(288,528) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(312,528) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(336,528) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(432,528) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(456,528) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(480,528) scale(4.12)"><rect width="6" height="6"/></g>
-<g transform="translate(48,48)"><g transform="scale(12)"><path d="M0,0v14h14V0H0z M12,12H2V2h10V12z"/></g></g>
-<g transform="translate(384,48)"><g transform="scale(12)"><path d="M0,0v14h14V0H0z M12,12H2V2h10V12z"/></g></g>
-<g transform="translate(48,384)"><g transform="scale(12)"><path d="M0,0v14h14V0H0z M12,12H2V2h10V12z"/></g></g>
-<g transform="translate(96,96)"><g transform="scale(12)"><rect width="6" height="6"/></g></g>
-<g transform="translate(432,96)"><g transform="scale(12)"><rect width="6" height="6"/></g></g>
-<g transform="translate(96,432)"><g transform="scale(12)"><rect width="6" height="6"/></g></g>
+<g transform="translate(432,504) scale(4.12)"><path d="M3,6H0V0l3,0c1.7,0,3,1.3,3,3v0C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(504,504) scale(4.12)"><circle cx="3" cy="3" r="3"/></g>
+<g transform="translate(312,528) scale(4.12)"><path d="M6,6H3C1.3,6,0,4.7,0,3v0c0-1.7,1.3-3,3-3h3C6,0,6,6,6,6z"/></g>
+<g transform="translate(336,528) scale(4.12)"><path d="M3,6H0V0l6,0v3C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(384,528) scale(4.12)"><path d="M6,6H3C1.3,6,0,4.7,0,3V0l6,0V6z"/></g>
+<g transform="translate(408,528) scale(4.12)"><path d="M3,6H0V0l6,0v3C6,4.7,4.7,6,3,6z"/></g>
+<g transform="translate(456,528) scale(4.12)"><circle cx="3" cy="3" r="3"/></g>
+<g transform="translate(48,48)"><g transform="scale(12)"><path d="M4.5,14h5.1C12,14,14,12,14,9.6V4.5C14,2,12,0,9.5,0H4.4C2,0,0,2,0,4.4v5.1C0,12,2,14,4.5,14z M12,4.8v4.4 c0,1.5-1.3,2.8-2.8,2.8H4.8C3.2,12,2,10.8,2,9.2V4.8C2,3.3,3.3,2,4.8,2h4.4C10.8,2,12,3.2,12,4.8z"/></g></g>
+<g transform="translate(384,48)"><g transform="scale(12)"><path d="M4.5,14h5.1C12,14,14,12,14,9.6V4.5C14,2,12,0,9.5,0H4.4C2,0,0,2,0,4.4v5.1C0,12,2,14,4.5,14z M12,4.8v4.4 c0,1.5-1.3,2.8-2.8,2.8H4.8C3.2,12,2,10.8,2,9.2V4.8C2,3.3,3.3,2,4.8,2h4.4C10.8,2,12,3.2,12,4.8z"/></g></g>
+<g transform="translate(48,384)"><g transform="scale(12)"><path d="M4.5,14h5.1C12,14,14,12,14,9.6V4.5C14,2,12,0,9.5,0H4.4C2,0,0,2,0,4.4v5.1C0,12,2,14,4.5,14z M12,4.8v4.4 c0,1.5-1.3,2.8-2.8,2.8H4.8C3.2,12,2,10.8,2,9.2V4.8C2,3.3,3.3,2,4.8,2h4.4C10.8,2,12,3.2,12,4.8z"/></g></g>
+<g transform="translate(96,96)"><g transform="scale(12)"><path d="M6,1.7v2.7C6,5.2,5.2,6,4.3,6H1.7C0.7,6,0,5.3,0,4.3V1.7C0,0.8,0.8,0,1.7,0h2.7C5.3,0,6,0.7,6,1.7z"/></g></g>
+<g transform="translate(432,96)"><g transform="scale(12)"><path d="M6,1.7v2.7C6,5.2,5.2,6,4.3,6H1.7C0.7,6,0,5.3,0,4.3V1.7C0,0.8,0.8,0,1.7,0h2.7C5.3,0,6,0.7,6,1.7z"/></g></g>
+<g transform="translate(96,432)"><g transform="scale(12)"><path d="M6,1.7v2.7C6,5.2,5.2,6,4.3,6H1.7C0.7,6,0,5.3,0,4.3V1.7C0,0.8,0.8,0,1.7,0h2.7C5.3,0,6,0.7,6,1.7z"/></g></g>
 </g></svg>

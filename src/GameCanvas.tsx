@@ -1,4 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
+import { loadStats, saveStats, loadLoyaltyCard, saveLoyaltyCard, loadAchievements, saveAchievements } from './services/firebase';
+import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { db } from './services/firebase';
 
 interface GameObject {
   x: number;
@@ -10,7 +13,7 @@ interface GameObject {
   id: string;
 }
 
-type GameState = 'menu' | 'playing' | 'result' | 'profile' | 'auth' | 'stats' | 'achievements' | 'prizes' | 'howtoplay' | 'prizeinfo' | 'leaderboard';
+type GameState = 'menu' | 'playing' | 'result' | 'profile' | 'auth' | 'stats' | 'achievements' | 'prizes' | 'howtoplay' | 'prizeinfo' | 'leaderboard' | 'adminStats';
 
 interface LoyaltyCard {
   number: string;
@@ -37,7 +40,7 @@ interface Achievement {
 }
 
 // --- Компонент PrizeList для призов ---
-const PrizeList: React.FC<{ setShowGift: (v: boolean) => void, ticketsCount: number }> = ({ setShowGift, ticketsCount }) => {
+const PrizeList: React.FC<{ setShowGift: (v: boolean) => void, ticketsCount: number, setShowPrize100: (v: boolean) => void }> = ({ setShowGift, ticketsCount, setShowPrize100 }) => {
   const [copied200, setCopied200] = useState(false);
   const [copied500, setCopied500] = useState(false);
   // Всегда три карточки, неактивные если билетов не хватает
@@ -66,7 +69,7 @@ const PrizeList: React.FC<{ setShowGift: (v: boolean) => void, ticketsCount: num
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 }}>
               <div></div>
               <button
-                onClick={() => setShowGift(true)}
+                onClick={() => setShowPrize100(true)}
                 style={{
                   padding: '10px',
                   fontSize: '14px',
@@ -286,6 +289,31 @@ const GameCanvas: React.FC = () => {
   const [showGift, setShowGift] = useState(false);
   const [copied, setCopied] = useState(false);
   const [deathReason, setDeathReason] = useState('');
+  const fpsRef = useRef<number>(60);
+  const [fps, setFps] = useState(60);
+  const lastFpsUpdate = useRef<number>(performance.now());
+  const frameCount = useRef<number>(0);
+  // useState для загрузки данных
+  const [loading, setLoading] = useState(true);
+  const [leaderboard, setLeaderboard] = useState<{id: string, score: number}[]>([]);
+  const [userPlace, setUserPlace] = useState<number | null>(null);
+  // Добавляю состояние для показа страницы приза 100 руб
+  const [showPrize100, setShowPrize100] = useState(false);
+  // Добавляю состояние для страницы "Где найти номер карты"
+  const [showWhereCard, setShowWhereCard] = useState(false);
+  // Добавляем новые состояния для админ-статистики
+  const [adminPassword, setAdminPassword] = useState('');
+  const [isAdminAuthorized, setIsAdminAuthorized] = useState(false);
+  const [adminStats, setAdminStats] = useState({
+    totalPlayers: 0,
+    totalGames: 0,
+    totalStats: {
+      itemsCaught: {} as { [key: string]: number },
+      timeUnderSlowEffect: 0,
+      totalPlayTime: 0
+    },
+    top100: [] as {id: string, score: number}[]
+  });
 
   // --- Причины смерти ---
   const timeDeathReasons = [
@@ -296,6 +324,7 @@ const GameCanvas: React.FC = () => {
   const anvilDeathReasons = [
     'Вас придавило(',
     'Наковальня сделала своё дело',
+    'Ваши нервы тоже железные?',
     'Следите за наковальней'
   ];
 
@@ -489,6 +518,7 @@ const GameCanvas: React.FC = () => {
 
   // Функция для воспроизведения звука
   const playSound = (soundName: string) => {
+    if (fpsRef.current < 20) return; // Отключаем звук при низком FPS
     const sound = sounds[soundName];
     if (sound) {
       sound.currentTime = 0;
@@ -506,7 +536,7 @@ const GameCanvas: React.FC = () => {
       name: 'Шампиньон',
       img: '/assets/champignon.png',
       desc: 'Вкусный и легкий. Даёт 10 очков и 1,5 секунды',
-      chance: 0.075,
+      chance: 0.15,
       points: 10,
       time: 1.5,
       floatText: '+10'
@@ -516,7 +546,7 @@ const GameCanvas: React.FC = () => {
       name: 'Огурец',
       img: '/assets/cucumber.png',
       desc: 'Полезный и зеленый. Даёт 15 очков и 1,3 секунды',
-      chance: 0.075,
+      chance: 0.10,
       points: 15,
       time: 1.3,
       floatText: '+15'
@@ -526,7 +556,7 @@ const GameCanvas: React.FC = () => {
       name: 'Баклажан',
       img: '/assets/eggplant.png',
       desc: 'Подозрительно фиолетовый. Даёт 5 очков и 1,7 секунд',
-      chance: 0.075,
+      chance: 0.10,
       points: 5,
       time: 1.7,
       floatText: '+5'
@@ -536,7 +566,7 @@ const GameCanvas: React.FC = () => {
       name: 'Шашлык',
       img: '/assets/kebab.png',
       desc: 'Сочный и ароматный. Даёт 20 очков и 2 секунды',
-      chance: 0.075,
+      chance: 0.20,
       points: 20,
       time: 2,
       floatText: '+20'
@@ -546,7 +576,7 @@ const GameCanvas: React.FC = () => {
       name: 'Салат',
       img: '/assets/salad.png',
       desc: 'Просто салат. Даёт 10 очков и 1 секунду',
-      chance: 0.075,
+      chance: 0.10,
       points: 10,
       time: 1,
       floatText: '+10'
@@ -556,7 +586,7 @@ const GameCanvas: React.FC = () => {
       name: 'Наковальня',
       img: '/assets/anvil.png',
       desc: 'Тяжелый и железный. Прекращает игру',
-      chance: 0.07,
+      chance: 0.09,
       floatText: 'Не успел'
     },
     {
@@ -564,7 +594,7 @@ const GameCanvas: React.FC = () => {
       name: 'Фуга',
       img: '/assets/puffer.png',
       desc: 'Надувается, замедляет все предметы на 3 секунды',
-      chance: 0.10,
+      chance: 0.07,
       floatText: 'Замедление'
     },
     {
@@ -580,7 +610,7 @@ const GameCanvas: React.FC = () => {
       name: 'Дождь',
       img: '/assets/drop.png',
       desc: 'Дождь из предметов',
-      chance: 0.025,
+      chance: 0.02,
       floatText: ''
     },
     {
@@ -588,7 +618,7 @@ const GameCanvas: React.FC = () => {
       name: 'Щит',
       img: '/assets/shield.png',
       desc: 'Железный и надежный, защищает от предметов',
-      chance: 0.10,
+      chance: 0.03,
       floatText: 'неуязвимость'
     },
     {
@@ -596,7 +626,7 @@ const GameCanvas: React.FC = () => {
       name: 'Магнит',
       img: '/assets/magnet.png',
       desc: 'Так и манит. Примагничивает все предметы на экране. Положительные.',
-      chance: 0.10,
+      chance: 0.03,
       floatText: 'притягивает'
     },
     {
@@ -604,7 +634,7 @@ const GameCanvas: React.FC = () => {
       name: 'Билетик',
       img: '/assets/ticket.png',
       desc: 'Поймайте билетик и получите шанс на приз!',
-      chance: 0.01,
+      chance: 0.003,
       floatText: '+билет'
     }
   ];
@@ -636,13 +666,13 @@ const GameCanvas: React.FC = () => {
       sum += item.chance;
       if (rand < sum) {
         const id = Math.random().toString(36).substr(2, 9);
-        const speed = item.type === 'anvil' ? 450 : 150 + Math.random() * 200;
+        const speed = item.type === 'anvil' ? 450 * 1.5 : 150 + Math.random() * 200;
         return {
           id,
           x: Math.random() * (dimensions.width - 50),
           y: -50,
-          width: 50,
-          height: 50,
+          width: item.type === 'anvil' ? 72 : 50, // Наковальня 72x72, остальные 50x50
+          height: item.type === 'anvil' ? 72 : 50, // Наковальня 72x72, остальные 50x50
           type: item.type as GameObject['type'],
           speed
         };
@@ -653,8 +683,8 @@ const GameCanvas: React.FC = () => {
       id: Math.random().toString(36).substr(2, 9),
       x: Math.random() * (dimensions.width - 50),
       y: -50,
-      width: 50,
-      height: 50,
+      width: 60,
+      height: 60,
       type: 'salad' as GameObject['type'],
       speed: 150 + Math.random() * 200
     };
@@ -868,6 +898,26 @@ const GameCanvas: React.FC = () => {
       ctx.fillText(`${score}`, dimensions.width / 2, 85);
       ctx.restore();
 
+      // FPS-трекер
+      frameCount.current++;
+      const now = performance.now();
+      if (now - lastFpsUpdate.current >= 1000) {
+        fpsRef.current = frameCount.current;
+        setFps(frameCount.current);
+        frameCount.current = 0;
+        lastFpsUpdate.current = now;
+      }
+
+      // Внутри gameLoop, после всей отрисовки (перед requestAnimationFrame):
+      ctx.save();
+      ctx.globalAlpha = 0.12;
+      ctx.font = '4px Arial, sans-serif';
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(`FPS: ${fps}`, 4, dimensions.height - 4);
+      ctx.restore();
+
       animationFrameId = requestAnimationFrame(gameLoop);
     };
 
@@ -961,32 +1011,82 @@ const GameCanvas: React.FC = () => {
     }
   };
 
-  const handleAuth = () => {
+  // useEffect для загрузки данных при монтировании/смене карты
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      let card = loyaltyCard;
+      if (!card.number) {
+        // Пробуем загрузить карту из localStorage для совместимости (можно убрать позже)
+        const saved = localStorage.getItem('loyaltyCard');
+        if (saved) card = JSON.parse(saved);
+      }
+      let loadedCard = await loadLoyaltyCard(card.number);
+      if (!loadedCard) {
+        await saveLoyaltyCard(card.number, card);
+        loadedCard = card;
+      }
+      setLoyaltyCard(loadedCard);
+      let stats = await loadStats(card.number);
+      if (!stats) {
+        stats = {
+          gamesPlayed: 0,
+          totalPlayTime: 0,
+          deathsByAnvil: 0,
+          itemsCaught: {},
+          timeUnderSlowEffect: 0,
+          highScore: 0
+        };
+        await saveStats(card.number, stats);
+      }
+      setGameStats(stats);
+      let ach = await loadAchievements(card.number);
+      if (!ach) {
+        ach = achievements;
+        await saveAchievements(card.number, ach);
+      }
+      setLoading(false);
+    }
+    if (loyaltyCard.number) fetchData();
+  }, [loyaltyCard.number]);
+
+  // handleAuth теперь не ждёт загрузки/сохранения, а сразу переводит в меню
+  const handleAuth = async () => {
     const cardNumber = cardInput.join('');
     const newCard = { number: cardNumber };
     setLoyaltyCard(newCard);
     localStorage.setItem('loyaltyCard', JSON.stringify(newCard));
-    
-    // Загружаем статистику для нового пользователя
-    const savedStats = localStorage.getItem(`stats_${cardNumber}`);
-    setGameStats(savedStats ? JSON.parse(savedStats) : {
-      gamesPlayed: 0,
-      totalPlayTime: 0,
-      deathsByAnvil: 0,
-      itemsCaught: {},
-      timeUnderSlowEffect: 0,
-      highScore: 0
-    });
-    
     setGameState('menu');
+    // Всё остальное — в фоне
+    saveLoyaltyCard(cardNumber, newCard);
+    loadStats(cardNumber).then((stats: GameStats | null) => {
+      if (!stats) {
+        stats = {
+          gamesPlayed: 0,
+          totalPlayTime: 0,
+          deathsByAnvil: 0,
+          itemsCaught: {},
+          timeUnderSlowEffect: 0,
+          highScore: 0
+        };
+        saveStats(cardNumber, stats);
+      }
+      setGameStats(stats);
+    });
+    loadAchievements(cardNumber).then((ach: Achievement[] | null) => {
+      if (!ach) {
+        ach = achievements;
+        saveAchievements(cardNumber, ach);
+      }
+      setAchievements(ach);
+    });
   };
 
+  // handleLogout сбрасывает состояние
   const handleLogout = () => {
-    localStorage.removeItem('loyaltyCard');
     setLoyaltyCard({ number: '' });
     setCardInput(['5', '1', '', '', '', '', '', '', '', '']);
     setGameState('auth');
-    // Сбрасываем статистику при выходе
     setGameStats({
       gamesPlayed: 0,
       totalPlayTime: 0,
@@ -1291,85 +1391,142 @@ const GameCanvas: React.FC = () => {
   };
 
   const renderAuth = () => (
-    <div style={{
-      width: '90%',
-      maxWidth: '600px',
-      margin: '0 auto',
-      minHeight: '100vh',
-      overflowY: 'auto',
-      boxSizing: 'border-box',
-      padding: '40px 0',
-      textAlign: 'center',
-      zIndex: 1
-    }}>
-      <img src="/assets/brandlogo.png" alt="Логотип" style={{ width: 280, margin: '0 auto 0px auto', display: 'block' }} />
-      <img src="/assets/icon.png" alt="Иконка" style={{ width: 220, margin: '0 auto 24px auto', display: 'block' }} />
-      <h2 style={{ 
-        fontSize: 'clamp(16px, 5vw, 16px)', 
-        marginBottom: '20px',
-        wordBreak: 'break-word'
-      }}>
-        Введите номер карты лояльности
-      </h2>
+    showWhereCard ? renderWhereCard() : (
       <div style={{
+        width: '90%',
+        maxWidth: '600px',
+        margin: '0 auto',
+        minHeight: '100vh',
+        overflowY: 'auto',
+        boxSizing: 'border-box',
+        padding: '40px 0',
+        textAlign: 'center',
+        zIndex: 1,
         display: 'flex',
-        gap: 4,
+        flexDirection: 'column',
+        alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: '20px',
-        flexWrap: 'nowrap',
-        width: '90vw',
-        maxWidth: 360,
-        minWidth: 240,
-        whiteSpace: 'nowrap'
       }}>
-        {cardInput.map((digit, index) => (
-          <input
-            key={index}
-            data-index={index}
-            type="text"
-            value={digit}
-            onChange={(e) => handleCardInput(index, e.target.value)}
+        <img src="/assets/brandlogo.png" alt="Логотип" style={{ width: 280, margin: '0 auto 0px auto', display: 'block' }} />
+        <img src="/assets/icon.png" alt="Иконка" style={{ width: 220, margin: '0 auto 24px auto', display: 'block' }} />
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 20,
+          marginBottom: 15,
+          padding: 10,
+          background: 'rgba(255, 255, 255, 0.9)',
+          borderRadius: 10,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        }}>
+          <img src="/assets/eggplant.png" alt="Баклажан" style={{ width: 40, height: 40, objectFit: 'contain' }} />
+          <div style={{ fontSize: 14, fontWeight: 600, textAlign: 'left', color: '#111' }}>
+            Дарим 50.000 баллов самым активным игрокам и раздаем подарки в игре!
+          </div>
+        </div>
+        <h2 style={{
+          fontSize: 'clamp(16px, 5vw, 16px)',
+          marginBottom: '10px',
+          wordBreak: 'break-word',
+          width: '100%',
+          textAlign: 'center'
+        }}>
+          Введите номер карты лояльности
+        </h2>
+        <div style={{
+          display: 'flex',
+          gap: 4,
+          justifyContent: 'center',
+          marginBottom: '20px',
+          flexWrap: 'nowrap',
+          width: '90vw',
+          maxWidth: 360,
+          minWidth: 240,
+          whiteSpace: 'nowrap',
+          alignItems: 'center',
+          textAlign: 'center'
+        }}>
+          {cardInput.map((digit, index) => (
+            <input
+              key={index}
+              data-index={index}
+              type="tel"
+              inputMode="numeric"
+              value={digit}
+              onChange={(e) => handleCardInput(index, e.target.value)}
+              style={{
+                width: '10%',
+                minWidth: 24,
+                maxWidth: 36,
+                height: 36,
+                fontSize: 16,
+                textAlign: 'center',
+                border: '2px solid #ccc',
+                borderRadius: '5px',
+                backgroundColor: index < 2 ? '#eee' : 'white',
+                cursor: index < 2 ? 'not-allowed' : 'text',
+                color: '#000',
+                padding: '0',
+                boxSizing: 'border-box'
+              }}
+              disabled={index < 2}
+              maxLength={1}
+            />
+          ))}
+        </div>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          marginBottom: 15,
+          padding: 10,
+          background: 'rgba(255, 255, 255, 0.9)',
+          borderRadius: 10,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        }}>
+          <div style={{ fontSize: 14, fontWeight: 600, textAlign: 'left', color: '#111' }}>
+            Номер карты лояльности вы можете найти в приложении "Калина-Малина" в профиле
+          </div>
+          <button
+            onClick={() => setShowWhereCard(true)}
             style={{
-              width: '10%',
-              minWidth: 24,
-              maxWidth: 36,
-              height: 36,
-              fontSize: 16,
-              textAlign: 'center',
-              border: '2px solid #ccc',
+              padding: '8px 18px',
+              fontSize: '14px',
+              backgroundColor: '#E50046',
+              color: 'white',
+              border: 'none',
               borderRadius: '5px',
-              backgroundColor: index < 2 ? '#eee' : 'white',
-              cursor: index < 2 ? 'not-allowed' : 'text',
-              color: '#000',
-              padding: '0',
-              boxSizing: 'border-box'
+              cursor: 'pointer',
+              fontWeight: 700
             }}
-            disabled={index < 2}
-            maxLength={1}
-          />
-        ))}
+          >
+            Где?
+          </button>
+        </div>
+        <button
+          onClick={() => {
+            handleButtonClick();
+            handleAuth();
+          }}
+          disabled={cardInput.some(digit => !digit)}
+          style={{
+            padding: '10px',
+            fontSize: '14px',
+            backgroundColor: cardInput.some(digit => !digit) ? '#ccc' : '#E50046',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: cardInput.some(digit => !digit) ? 'not-allowed' : 'pointer',
+            width: 'auto',
+            minWidth: '200px',
+            margin: '0 auto',
+            display: 'block'
+          }}
+        >
+          войти
+        </button>
       </div>
-      <button
-        onClick={() => {
-          handleButtonClick();
-          handleAuth();
-        }}
-        disabled={cardInput.some(digit => !digit)}
-        style={{
-          padding: '10px',
-          fontSize: '14px',
-          backgroundColor: cardInput.some(digit => !digit) ? '#ccc' : '#E50046',
-          color: 'white',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: cardInput.some(digit => !digit) ? 'not-allowed' : 'pointer',
-          width: 'auto',
-          minWidth: '200px'
-        }}
-      >
-        войти
-      </button>
-    </div>
+    )
   );
 
   // --- Страница 'Как играть' ---
@@ -1884,53 +2041,56 @@ const GameCanvas: React.FC = () => {
     </div>
   );
 
-  const renderPrizes = () => (
-    <div style={{
-      width: '90%',
-      maxWidth: '800px',
-      margin: '0 auto',
-      minHeight: '100vh',
-      boxSizing: 'border-box',
-      padding: '40px 0',
-      textAlign: 'center',
-      zIndex: 1
-    }}>
+  const renderPrizes = () => {
+    if (showPrize100) return renderPrize100();
+    return (
       <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 20,
-        marginBottom: 30,
-        padding: 10,
-        background: 'rgba(255, 255, 255, 0.9)',
-        borderRadius: 10,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        width: '90%',
+        maxWidth: '800px',
+        margin: '0 auto',
+        minHeight: '100vh',
+        boxSizing: 'border-box',
+        padding: '40px 0',
+        textAlign: 'center',
+        zIndex: 1
       }}>
-        <img src="/assets/ticket.png" alt="Билетик" style={{ width: 40, height: 40, objectFit: 'contain' }} />
-        <div style={{ fontSize: 14, fontWeight: 600, textAlign: 'left', color: '#111' }}>
-          Ловите билетики и получайте приятные подарки!
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 20,
+          marginBottom: 30,
+          padding: 10,
+          background: 'rgba(255, 255, 255, 0.9)',
+          borderRadius: 10,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        }}>
+          <img src="/assets/ticket.png" alt="Билетик" style={{ width: 40, height: 40, objectFit: 'contain' }} />
+          <div style={{ fontSize: 14, fontWeight: 600, textAlign: 'left', color: '#111' }}>
+            Ловите билетики и получайте приятные подарки!
+          </div>
         </div>
+        <PrizeList setShowGift={setShowGift} ticketsCount={gameStats.itemsCaught.ticket || 0} setShowPrize100={setShowPrize100} />
+        <button
+          onClick={() => {
+            handleButtonClick();
+            setGameState('profile');
+          }}
+          style={{
+            padding: '10px',
+            fontSize: '14px',
+            backgroundColor: '#E50046',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            marginTop: 20
+          }}
+        >
+          Назад
+        </button>
       </div>
-      <PrizeList setShowGift={setShowGift} ticketsCount={gameStats.itemsCaught.ticket || 0} />
-      <button
-        onClick={() => {
-          handleButtonClick();
-          setGameState('profile');
-        }}
-        style={{
-          padding: '10px',
-          fontSize: '14px',
-          backgroundColor: '#E50046',
-          color: 'white',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer',
-          marginTop: 20
-        }}
-      >
-        Назад
-      </button>
-    </div>
-  );
+    );
+  };
 
   // --- Страница подарка ---
   const renderGift = () => (
@@ -2060,25 +2220,7 @@ const GameCanvas: React.FC = () => {
 
   // --- Страница рейтинга ---
   const renderLeaderboard = () => {
-    // Собираем всех игроков из localStorage
-    const allStats: { id: string, score: number }[] = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith('stats_')) {
-        const stats = JSON.parse(localStorage.getItem(key) || '{}');
-        if (typeof stats.highScore === 'number') {
-          allStats.push({ id: key.replace('stats_', ''), score: stats.highScore });
-        }
-      }
-    }
-    // Сортируем по убыванию highScore
-    allStats.sort((a, b) => b.score - a.score);
-    // Топ-10
-    const leaderboard = allStats.slice(0, 10);
-    // Место пользователя
-    const userIdx = allStats.findIndex(s => s.id === loyaltyCard.number);
-    const userPlace = userIdx >= 0 ? userIdx + 1 : allStats.length + 1;
-    const totalPlayers = allStats.length;
+    const totalPlayers = leaderboard.length;
     return (
       <div style={{
         width: '90%',
@@ -2092,7 +2234,7 @@ const GameCanvas: React.FC = () => {
       }}>
         <h2 style={{ fontSize: '24px', marginBottom: '10px', color: '#fff' }}>Лучшая десятка игроков</h2>
         <div style={{ fontSize: '18px', marginBottom: '20px', color: '#fff' }}>
-          Ваше место {userPlace} из {totalPlayers}
+          Ваше место {userPlace || '-'} из {totalPlayers}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 30, maxHeight: 320, overflowY: 'auto' }}>
           {leaderboard.map((item, idx) => (
@@ -2131,6 +2273,330 @@ const GameCanvas: React.FC = () => {
       </div>
     );
   };
+
+  useEffect(() => {
+    if (gameState === 'leaderboard') {
+      fetchLeaderboard().then(setLeaderboard);
+      if (loyaltyCard.number) fetchUserPlace(loyaltyCard.number).then((place) => setUserPlace(place));
+    }
+  }, [gameState, loyaltyCard.number]);
+
+  const fetchLeaderboard = async (): Promise<{id: string, score: number}[]> => {
+    const q = query(collection(db, 'stats'), orderBy('highScore', 'desc'), limit(10));
+    const querySnapshot = await getDocs(q);
+    const leaderboard: {id: string, score: number}[] = [];
+    querySnapshot.forEach(doc => {
+      leaderboard.push({ id: doc.id, score: doc.data().highScore });
+    });
+    return leaderboard;
+  };
+
+  const fetchUserPlace = async (userId: string): Promise<number|null> => {
+    const q = query(collection(db, 'stats'), orderBy('highScore', 'desc'));
+    const querySnapshot = await getDocs(q);
+    let place = 1;
+    let found = false;
+    querySnapshot.forEach(doc => {
+      if (doc.id === userId) found = true;
+      if (!found) place++;
+    });
+    return found ? place : null;
+  };
+
+  // Добавляю useEffect для отправки данных только при завершении игры
+  useEffect(() => {
+    if (gameState === 'result' && loyaltyCard.number) {
+      saveStats(loyaltyCard.number, gameStats);
+      saveAchievements(loyaltyCard.number, achievements);
+    }
+  }, [gameState]);
+
+  // При загрузке компонента пробую взять карту из localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('loyaltyCard');
+    if (saved) {
+      const card = JSON.parse(saved);
+      if (card && card.number) {
+        setLoyaltyCard(card);
+      }
+    }
+  }, []);
+
+  // Добавляю компонент страницы приза 100 руб
+  const renderPrize100 = () => (
+    <div style={{
+      width: '90%',
+      maxWidth: '600px',
+      margin: '0 auto',
+      minHeight: '100vh',
+      boxSizing: 'border-box',
+      padding: '40px 0',
+      textAlign: 'center',
+      zIndex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8
+    }}>
+      <h2 style={{ fontSize: '20px', marginBottom: '5px' }}>Скидка 100 рублей</h2>
+      <div style={{ fontSize: '18px', marginBottom: '5px' }}>На покупки от 1000 рублей</div>
+      <div style={{ fontSize: '18px', marginBottom: '5px' }}>Покажите QR-код в магазине</div>
+      <img src="/assets/coupon.svg" alt="QR" style={{ width: 180, marginBottom: 5 }} />
+      <button
+        onClick={() => setShowPrize100(false)}
+        style={{
+          padding: '10px',
+          fontSize: '14px',
+          backgroundColor: '#E50046',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          marginTop: 10
+        }}
+      >
+        Назад
+      </button>
+    </div>
+  );
+
+  // Добавляю компонент renderWhereCard
+  const renderWhereCard = () => (
+    <div style={{
+      width: '90%',
+      maxWidth: '600px',
+      margin: '0 auto',
+      minHeight: '100vh',
+      boxSizing: 'border-box',
+      padding: '40px 0',
+      textAlign: 'center',
+      zIndex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 16,
+      background: 'rgba(0,0,0,0.7)'
+    }}>
+      <h2 style={{ fontSize: 20, color: '#fff', marginBottom: 10 }}>Где найти номер карты лояльности?</h2>
+      <div style={{ fontSize: 16, color: '#fff', marginBottom: 10 }}>
+        Найти номер карты лояльности вы можете в приложении.<br />Откройте профиль и введите свой код, как на примере ниже
+      </div>
+      <img src="/assets/where.png" alt="Где найти номер карты" style={{ width: 260, maxWidth: '90vw', marginBottom: 20, borderRadius: 10, boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }} />
+      <button
+        onClick={() => setShowWhereCard(false)}
+        style={{
+          padding: '10px',
+          fontSize: '14px',
+          backgroundColor: '#E50046',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          minWidth: 180,
+          fontWeight: 700
+        }}
+      >
+        Авторизоваться
+      </button>
+    </div>
+  );
+
+  // Добавляем функцию для загрузки админ-статистики
+  const loadAdminStats = async () => {
+    if (!isAdminAuthorized) return;
+    
+    try {
+      // Получаем все карты лояльности
+      const cardsSnapshot = await getDocs(collection(db, 'loyaltyCards'));
+      const totalPlayers = cardsSnapshot.size;
+      
+      // Получаем все статистики
+      const statsSnapshot = await getDocs(collection(db, 'stats'));
+      let totalGames = 0;
+      const totalStats = {
+        itemsCaught: {} as { [key: string]: number },
+        timeUnderSlowEffect: 0,
+        totalPlayTime: 0
+      };
+      
+      // Создаем промисы для всех операций
+      const statsPromises = statsSnapshot.docs.map(async (doc) => {
+        const data = await doc.data();
+        totalGames += data.gamesPlayed || 0;
+        totalStats.timeUnderSlowEffect += data.timeUnderSlowEffect || 0;
+        totalStats.totalPlayTime += data.totalPlayTime || 0;
+        
+        if (data.itemsCaught) {
+          Object.entries(data.itemsCaught).forEach(([item, count]) => {
+            totalStats.itemsCaught[item] = (totalStats.itemsCaught[item] || 0) + (count as number);
+          });
+        }
+      });
+
+      // Ждем завершения всех операций
+      await Promise.all(statsPromises);
+      
+      // Получаем топ-100 игроков
+      const top100Query = query(collection(db, 'stats'), orderBy('highScore', 'desc'), limit(100));
+      const top100Snapshot = await getDocs(top100Query);
+      const top100 = top100Snapshot.docs.map(doc => ({
+        id: doc.id,
+        score: doc.data().highScore
+      }));
+      
+      setAdminStats({
+        totalPlayers,
+        totalGames,
+        totalStats,
+        top100
+      });
+    } catch (error) {
+      console.error('Ошибка загрузки админ-статистики:', error);
+    }
+  };
+
+  // Добавляем обработчик авторизации админа
+  const handleAdminAuth = () => {
+    if (adminPassword === 'yourpassword') {
+      setIsAdminAuthorized(true);
+      loadAdminStats();
+    } else {
+      alert('Неверный пароль');
+    }
+  };
+
+  // Добавляем рендер страницы админ-статистики
+  const renderAdminStats = () => {
+    if (!isAdminAuthorized) {
+      return (
+        <div style={{
+          width: '90%',
+          maxWidth: '600px',
+          margin: '0 auto',
+          minHeight: '100vh',
+          boxSizing: 'border-box',
+          padding: '40px 0',
+          textAlign: 'center',
+          zIndex: 1
+        }}>
+          <h2 style={{ fontSize: '24px', marginBottom: '20px', color: '#fff' }}>Админ-панель</h2>
+          <input
+            type="password"
+            value={adminPassword}
+            onChange={(e) => setAdminPassword(e.target.value)}
+            placeholder="Введите пароль"
+            style={{
+              padding: '10px',
+              fontSize: '14px',
+              width: '200px',
+              marginBottom: '10px',
+              borderRadius: '5px',
+              border: 'none'
+            }}
+          />
+          <button
+            onClick={handleAdminAuth}
+            style={{
+              padding: '10px',
+              fontSize: '14px',
+              backgroundColor: '#E50046',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              display: 'block',
+              margin: '0 auto'
+            }}
+          >
+            Войти
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div style={{
+        width: '90%',
+        maxWidth: '800px',
+        margin: '0 auto',
+        minHeight: '100vh',
+        boxSizing: 'border-box',
+        padding: '40px 0',
+        textAlign: 'center',
+        zIndex: 1,
+        color: '#fff'
+      }}>
+        <h2 style={{ fontSize: '24px', marginBottom: '20px' }}>Админ-статистика</h2>
+        
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.1)',
+          padding: '20px',
+          borderRadius: '10px',
+          marginBottom: '20px'
+        }}>
+          <h3 style={{ fontSize: '20px', marginBottom: '15px' }}>Общая статистика</h3>
+          <p>Всего игроков: {adminStats.totalPlayers}</p>
+          <p>Всего сыграно игр: {adminStats.totalGames}</p>
+          <p>Общее время в игре: {Math.floor(adminStats.totalStats.totalPlayTime / 1000)} сек</p>
+          <p>Общее время под замедлением: {Math.floor(adminStats.totalStats.timeUnderSlowEffect / 1000)} сек</p>
+          
+          <h4 style={{ fontSize: '18px', marginTop: '15px', marginBottom: '10px' }}>Поймано предметов:</h4>
+          {Object.entries(adminStats.totalStats.itemsCaught).map(([item, count]) => (
+            <p key={item}>{item}: {count}</p>
+          ))}
+        </div>
+
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.1)',
+          padding: '20px',
+          borderRadius: '10px',
+          maxHeight: '500px',
+          overflowY: 'auto'
+        }}>
+          <h3 style={{ fontSize: '20px', marginBottom: '15px' }}>Топ-100 игроков</h3>
+          {adminStats.top100.map((player, index) => (
+            <div key={player.id} style={{
+              padding: '10px',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              display: 'flex',
+              justifyContent: 'space-between'
+            }}>
+              <span>#{index + 1} ID: {player.id}</span>
+              <span>Рекорд: {player.score}</span>
+            </div>
+          ))}
+        </div>
+
+        <button
+          onClick={() => {
+            setIsAdminAuthorized(false);
+            setAdminPassword('');
+          }}
+          style={{
+            padding: '10px',
+            fontSize: '14px',
+            backgroundColor: '#E50046',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            marginTop: '20px'
+          }}
+        >
+          Выйти
+        </button>
+      </div>
+    );
+  };
+
+  // Добавляем обработку URL для админ-статистики
+  useEffect(() => {
+    if (window.location.pathname === '/stats') {
+      setGameState('adminStats');
+    }
+  }, []);
 
   return (
     <>
@@ -2261,7 +2727,19 @@ const GameCanvas: React.FC = () => {
             maxWidth: '800px'
           }}>{renderLeaderboard()}</div>
         )}
+        {gameState === 'adminStats' && (
+          <div style={{
+            zIndex: 3,
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '100%',
+            maxWidth: '800px'
+          }}>{renderAdminStats()}</div>
+        )}
         {renderFloatingText()}
+        {showPrize100 && renderPrize100()}
       </div>
     </>
   );
