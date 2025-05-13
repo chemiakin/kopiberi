@@ -439,6 +439,8 @@ const GameCanvas: React.FC = () => {
 
   // Загрузка звуков
   useEffect(() => {
+    // Временно отключаем загрузку звуков
+    /*
     const loadSounds = async () => {
       const soundNames = [
         'button',     // Звук нажатия кнопки
@@ -472,10 +474,13 @@ const GameCanvas: React.FC = () => {
     };
 
     loadSounds();
+    */
   }, []);
 
   // Функция для воспроизведения следующей фоновой музыки
   const playNextBackgroundMusic = () => {
+    // Временно отключаем фоновую музыку
+    /*
     if (backgroundMusicRef.current) {
       backgroundMusicRef.current.pause();
     }
@@ -502,10 +507,13 @@ const GameCanvas: React.FC = () => {
         backgroundMusicTimerRef.current = window.setTimeout(playNextBackgroundMusic, 100);
       });
     }
+    */
   };
 
   // Запуск фоновой музыки при старте игры
   useEffect(() => {
+    // Временно отключаем фоновую музыку
+    /*
     if (gameState === 'playing') {
       playNextBackgroundMusic();
     } else if (backgroundMusicRef.current) {
@@ -520,10 +528,13 @@ const GameCanvas: React.FC = () => {
         clearTimeout(backgroundMusicTimerRef.current);
       }
     };
+    */
   }, [gameState, sounds]);
 
   // Функция для воспроизведения звука
   const playSound = (soundName: string) => {
+    // Временно отключаем звуки
+    /*
     if (fpsRef.current < 20) return; // Отключаем звук при низком FPS
     const sound = sounds[soundName];
     if (sound) {
@@ -533,6 +544,7 @@ const GameCanvas: React.FC = () => {
         playPromise.catch(() => {});
       }
     }
+    */
   };
 
   // --- Данные по предметам с шансами и описаниями ---
@@ -1253,7 +1265,8 @@ const GameCanvas: React.FC = () => {
 
   // Обновляем все обработчики кнопок
   const handleButtonClick = () => {
-    playSound('button');
+    // Временно отключаем звук кнопки
+    // playSound('button');
   };
 
   // Компонент анимированного счета
