@@ -1563,7 +1563,7 @@ const GameCanvas: React.FC = () => {
       flexDirection: 'column'
     }}>
       <h2 style={{ fontSize: '32px', marginBottom: '20px', color: '#fff' }}>Как играть</h2>
-      <p style={{ fontSize: '10px', marginBottom: '20px', color: '#fff' }}>
+      <p style={{ fontSize: '14px', marginBottom: '20px', color: '#fff' }}>
         Ловите предметы, двигая корзину влево и вправо, избегайте негативные предметы.
       </p>
       <div style={{
