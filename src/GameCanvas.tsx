@@ -779,7 +779,7 @@ const GameCanvas: React.FC = () => {
         const safeAreaBottom = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sab') || '0');
         ctx.save();
         const basketCenterX = basketX + basketWidth / 2;
-        const basketY = dimensions.height - basketHeight - safeAreaBottom - 20;
+        const basketY = dimensions.height - basketHeight - safeAreaBottom;
         ctx.translate(basketCenterX, basketY + basketHeight / 2);
         ctx.rotate(basketTilt);
         ctx.drawImage(
@@ -841,7 +841,7 @@ const GameCanvas: React.FC = () => {
       const bottomSafeArea = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sab') || '0');
       
       // Вычисляем доступную высоту с учетом безопасных зон
-      const availableHeight = window.innerHeight - topSafeArea - bottomSafeArea;
+      const availableHeight = window.innerHeight;
       
       // Устанавливаем размеры canvas
       setDimensions({
@@ -864,8 +864,8 @@ const GameCanvas: React.FC = () => {
   // Обновляем useEffect для установки CSS-переменных
   useEffect(() => {
     const setSafeAreaVariables = () => {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
+      const dvh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--dvh', `${dvh}px`);
       
       // Определяем безопасные зоны с учетом браузера
       let topSafeArea = 0;
@@ -2680,7 +2680,7 @@ const GameCanvas: React.FC = () => {
     <div style={{ 
       position: 'relative', 
       width: '100%', 
-      height: 'calc(var(--vh, 1vh) * 100)',
+      height: 'calc(var(--dvh, 1dvh) * 100)',
       fontFamily: '"Play", Arial, sans-serif',
       background: 'transparent',
       zIndex: 1,
@@ -2699,8 +2699,8 @@ const GameCanvas: React.FC = () => {
             touchAction: 'none',
             zIndex: 2,
             position: 'relative',
-            marginTop: 'var(--sat, 0px)',
-            marginBottom: 'var(--sab, 0px)'
+            marginTop: 0,
+            marginBottom: 0
           }}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
@@ -2718,7 +2718,6 @@ const GameCanvas: React.FC = () => {
           bottom: 0,
           overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
-          padding: '20px 0',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center'
@@ -2734,7 +2733,6 @@ const GameCanvas: React.FC = () => {
           bottom: 0,
           overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
-          padding: '20px 0',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center'
@@ -2750,7 +2748,6 @@ const GameCanvas: React.FC = () => {
           bottom: 0,
           overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
-          padding: '20px 0',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center'
@@ -2766,7 +2763,6 @@ const GameCanvas: React.FC = () => {
           bottom: 0,
           overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
-          padding: '20px 0',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center'
@@ -2782,7 +2778,6 @@ const GameCanvas: React.FC = () => {
           bottom: 0,
           overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
-          padding: '20px 0',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center'
@@ -2798,7 +2793,6 @@ const GameCanvas: React.FC = () => {
           bottom: 0,
           overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
-          padding: '20px 0',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center'
@@ -2814,7 +2808,6 @@ const GameCanvas: React.FC = () => {
           bottom: 0,
           overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
-          padding: '20px 0',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center'
@@ -2830,7 +2823,6 @@ const GameCanvas: React.FC = () => {
           bottom: 0,
           overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
-          padding: '20px 0',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center'
@@ -2846,7 +2838,6 @@ const GameCanvas: React.FC = () => {
           bottom: 0,
           overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
-          padding: '20px 0',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center'
@@ -2862,7 +2853,6 @@ const GameCanvas: React.FC = () => {
           bottom: 0,
           overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
-          padding: '20px 0',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center'
