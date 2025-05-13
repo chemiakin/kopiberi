@@ -8,7 +8,7 @@ interface GameObject {
   y: number;
   width: number;
   height: number;
-  type: 'salad' | 'kebab' | 'champignon' | 'cucumber' | 'eggplant' | 'anvil' | 'puffer' | 'sock' | 'drop' | 'magnet' | 'shield' | 'ticket';
+  type: 'salad' | 'kebab' | 'champignon' | 'cucumber' | 'eggplant' | 'anvil' | 'puffer' | 'sock' | 'drop' | 'magnet' | 'shield' | 'ticket' | 'boot';
   speed: number;
   id: string;
 }
@@ -322,18 +322,25 @@ const GameCanvas: React.FC = () => {
   // Добавляю состояние для страницы "Где найти номер карты"
   const [showWhereCard, setShowWhereCard] = useState(false);
   // Добавляем новые состояния для админ-статистики
-  const [adminPassword, setAdminPassword] = useState('');
-  const [isAdminAuthorized, setIsAdminAuthorized] = useState(false);
-  const [adminStats, setAdminStats] = useState({
+  const [adminStats, setAdminStats] = useState<{
+    totalPlayers: number;
+    totalGames: number;
+    totalStats: GameStats;
+    top100: { id: string; score: number }[];
+  }>({
     totalPlayers: 0,
     totalGames: 0,
     totalStats: {
-      itemsCaught: {} as { [key: string]: number },
+      highScore: 0,
+      totalPlayTime: 0,
       timeUnderSlowEffect: 0,
-      totalPlayTime: 0
+      itemsCaught: {} as { [key in GameObject['type']]: number },
+      gamesPlayed: 0,
+      deathsByAnvil: 0
     },
-    top100: [] as {id: string, score: number}[]
+    top100: []
   });
+  const [bootEffect, setBootEffect] = useState(false);
 
   // --- Причины смерти ---
   const timeDeathReasons = [
@@ -411,7 +418,7 @@ const GameCanvas: React.FC = () => {
       const imageNames = [
         'salad', 'kebab', 'champignon', 'cucumber', 'eggplant',
         'anvil', 'puffer', 'sock', 'basket',
-        'drop', 'magnet', 'shield', 'ticket'
+        'drop', 'magnet', 'shield', 'ticket', 'boot'
       ];
       const loadedImages: { [key: string]: HTMLImageElement } = {};
       try {
@@ -438,12 +445,20 @@ const GameCanvas: React.FC = () => {
         for (const name of imageNames) {
           const img = new Image();
           img.src = `/assets/${name}.png`;
+          console.log(`Загрузка изображения: ${name}.png`);
           await new Promise((resolve, reject) => {
-            img.onload = resolve;
-            img.onerror = reject;
+            img.onload = () => {
+              console.log(`Успешно загружено: ${name}.png`);
+              resolve(null);
+            };
+            img.onerror = (error) => {
+              console.error(`Ошибка загрузки ${name}.png:`, error);
+              reject(error);
+            };
           });
           loadedImages[name] = img;
         }
+        console.log('Все изображения загружены:', Object.keys(loadedImages));
         setImages(loadedImages);
       } catch (error) {
         console.error('Ошибка загрузки изображений:', error);
@@ -565,6 +580,14 @@ const GameCanvas: React.FC = () => {
       desc: 'Поймайте билетик и получите шанс на приз!',
       chance: 0.003,
       floatText: '+билет'
+    },
+    {
+      type: 'boot',
+      name: 'Сапог',
+      img: '/assets/boot.png',
+      desc: 'Все предметы превращаются в сапоги!',
+      chance: 0.017,
+      floatText: 'Сапоги!'
     }
   ];
 
@@ -713,7 +736,7 @@ const GameCanvas: React.FC = () => {
           setObjectRotations(prev => ({ ...prev, [obj.id]: rotation }));
         }
 
-        if (magnetEffect && !['anvil', 'puffer', 'sock', 'drop', 'magnet', 'shield'].includes(obj.type)) {
+        if (magnetEffect && !['anvil', 'puffer', 'sock', 'drop', 'magnet', 'shield', 'boot'].includes(obj.type)) {
           const dx = basketX - obj.x;
           const dy = (dimensions.height - 80 * basketScale) - obj.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
@@ -722,13 +745,17 @@ const GameCanvas: React.FC = () => {
             newY += (dy / distance) * obj.speed * 2 * deltaTime / 1000;
           }
         } else {
-          newY += obj.speed * (slowEffect && !['anvil', 'puffer', 'sock', 'drop', 'magnet', 'shield'].includes(obj.type) ? 0.5 : 1) * deltaTime / 1000;
+          newY += obj.speed * (slowEffect && !['anvil', 'puffer', 'sock', 'drop', 'magnet', 'shield', 'boot'].includes(obj.type) ? 0.5 : 1) * deltaTime / 1000;
         }
+
+        // Если активен эффект сапога, заменяем тип предмета на сапог
+        const finalType = bootEffect ? 'boot' : obj.type;
 
         return {
           ...obj,
           x: newX,
-          y: newY
+          y: newY,
+          type: finalType
         };
       }).filter(obj => {
         const basketHeight = 80 * basketScale;
@@ -739,7 +766,7 @@ const GameCanvas: React.FC = () => {
             return false;
           }
           if (obj.y > dimensions.height) {
-            if (!['anvil', 'puffer', 'sock', 'drop', 'magnet', 'shield'].includes(obj.type) && !rainEffect) {
+            if (!['anvil', 'puffer', 'sock', 'drop', 'magnet', 'shield', 'boot'].includes(obj.type) && !rainEffect) {
               setTimeLeft(prev => Math.max(0, prev - 2));
               if (damageTimeoutId) {
                 clearTimeout(damageTimeoutId);
@@ -771,6 +798,8 @@ const GameCanvas: React.FC = () => {
           ctx.rotate(objectRotations[obj.id] || 0);
           ctx.drawImage(img, -obj.width / 2, -obj.height / 2, obj.width, obj.height);
           ctx.restore();
+        } else {
+          console.warn(`Изображение не найдено для типа: ${obj.type}`);
         }
       });
 
@@ -1122,6 +1151,19 @@ const GameCanvas: React.FC = () => {
     const basketCenterX = basketX + 50 * basketScale;
     const basketY = dimensions.height - 80 * basketScale - 20;
     if (item) {
+      // Обновляем статистику для всех пойманных предметов
+      setGameStats(prev => {
+        const newStats = {
+          ...prev,
+          itemsCaught: {
+            ...prev.itemsCaught,
+            [obj.type]: (prev.itemsCaught[obj.type] || 0) + 1
+          }
+        };
+        updateAchievements(newStats);
+        return newStats;
+      });
+
       if (item.floatText) {
         setFloatingText({ text: item.floatText, x: basketCenterX, y: basketY, opacity: 1 });
         setTimeout(() => setFloatingText(null), 700);
@@ -1134,7 +1176,7 @@ const GameCanvas: React.FC = () => {
       }
       // --- Во время rainEffect негативные и эффекты не действуют ---
       if (rainEffect && [
-        'anvil','puffer','sock','drop','shield'
+        'anvil','puffer','sock','drop','shield','boot'
       ].includes(obj.type)) {
         return;
       }
@@ -1146,17 +1188,6 @@ const GameCanvas: React.FC = () => {
         case 'salad':
           setScore(s => s + (item.points || 0));
           setTimeLeft(prev => Math.min(prev + (item.time || 0), 8));
-          setGameStats(prev => {
-            const newStats = {
-              ...prev,
-              itemsCaught: {
-                ...prev.itemsCaught,
-                [obj.type]: (prev.itemsCaught[obj.type] || 0) + 1
-              }
-            };
-            updateAchievements(newStats);
-            return newStats;
-          });
           break;
         case 'anvil':
           if (!shieldEffect && !rainEffect) {
@@ -1249,6 +1280,18 @@ const GameCanvas: React.FC = () => {
             updateAchievements(newStats);
             return newStats;
           });
+          break;
+        case 'boot':
+          if (!effectTimersRef.current.boot && !shieldEffect) {
+            // playSound('negative');
+            setBootEffect(true);
+            setScreenGlow({ color: '#795548', intensity: 1 });
+            effectTimersRef.current.boot = window.setTimeout(() => {
+              setBootEffect(false);
+              setScreenGlow(null);
+              delete effectTimersRef.current.boot;
+            }, 3000);
+          }
           break;
         default:
           break;
@@ -2005,6 +2048,11 @@ const GameCanvas: React.FC = () => {
     </div>
   );
 
+  // --- Для отображения всех типов предметов ---
+  const allTypes: GameObject['type'][] = [
+    'salad', 'kebab', 'champignon', 'cucumber', 'eggplant', 'anvil', 'puffer', 'sock', 'drop', 'magnet', 'shield', 'ticket'
+  ];
+
   const renderStats = () => (
     <div style={{
       width: '90%',
@@ -2042,22 +2090,8 @@ const GameCanvas: React.FC = () => {
           <p>Рекорд: {gameStats.highScore}</p>
           <p>Поймано билетов: {gameStats.itemsCaught.ticket || 0}</p>
           <h3 style={{ marginTop: '20px' }}>Пойманные предметы:</h3>
-          {Object.entries(gameStats.itemsCaught).map(([type, count]) => (
-            <p key={type}>{type}: {count}</p>
-          ))}
-        </div>
-
-        <h2 style={{ fontSize: 'clamp(24px, 5vw, 32px)', marginTop: '40px', marginBottom: '20px' }}>
-          Общая статистика
-        </h2>
-        <div style={{ textAlign: 'left', marginBottom: '20px' }}>
-          <p>Всего игроков: {adminStats.totalPlayers}</p>
-          <p>Всего игр: {adminStats.totalGames}</p>
-          <p>Общее время в игре: {Math.floor(adminStats.totalStats.totalPlayTime / 1000)} сек</p>
-          <p>Общее время под замедлением: {Math.floor(adminStats.totalStats.timeUnderSlowEffect / 1000)} сек</p>
-          <h3 style={{ marginTop: '20px' }}>Всего поймано предметов:</h3>
-          {Object.entries(adminStats.totalStats.itemsCaught).map(([type, count]) => (
-            <p key={type}>{type}: {count}</p>
+          {allTypes.map(type => (
+            <p key={type}>{type}: {gameStats.itemsCaught[type] || 0}</p>
           ))}
         </div>
       </div>
@@ -2301,20 +2335,29 @@ const GameCanvas: React.FC = () => {
     return () => clearInterval(handle);
   }, [basketX, gameState]);
 
-  // --- Исправление highScore ---
+  // --- Исправление highScore и сохранение статистики ---
   useEffect(() => {
     if (gameState === 'result') {
+      // Сначала обновляем highScore
       setGameStats(prev => {
+        const newStats = score > prev.highScore 
+          ? { ...prev, highScore: score }
+          : prev;
+          
         if (score > prev.highScore) {
-          const newStats = { ...prev, highScore: score };
           updateAchievements(newStats);
-          return newStats;
+          
+          // Сохраняем в Firebase только если есть номер карты
+          if (loyaltyCard.number) {
+            saveStats(loyaltyCard.number, newStats);
+            saveAchievements(loyaltyCard.number, achievements);
+          }
         }
-        return prev;
+        
+        return newStats;
       });
     }
-    // eslint-disable-next-line
-  }, [gameState]);
+  }, [gameState, score, loyaltyCard.number, achievements]);
 
   // --- Страница рейтинга ---
   const renderLeaderboard = () => {
@@ -2535,117 +2578,61 @@ const GameCanvas: React.FC = () => {
 
   // Добавляем функцию для загрузки админ-статистики
   const loadAdminStats = async () => {
-    if (!isAdminAuthorized) return;
-    
     try {
-      // Получаем все карты лояльности
-      const cardsSnapshot = await getDocs(collection(db, 'loyaltyCards'));
-      const totalPlayers = cardsSnapshot.size;
+      const loyaltyCardsSnapshot = await getDocs(collection(db, 'loyaltyCards'));
+      const loyaltyCards = loyaltyCardsSnapshot.docs.map(doc => doc.data());
       
-      // Получаем все статистики
       const statsSnapshot = await getDocs(collection(db, 'stats'));
-      let totalGames = 0;
-      const totalStats = {
-        itemsCaught: {} as { [key: string]: number },
+      const stats = statsSnapshot.docs.map(doc => doc.data());
+      
+      const totalStats: GameStats = {
+        highScore: 0,
+        totalPlayTime: 0,
         timeUnderSlowEffect: 0,
-        totalPlayTime: 0
+        itemsCaught: {} as { [key in GameObject['type']]: number },
+        gamesPlayed: 0,
+        deathsByAnvil: 0
       };
       
-      // Создаем промисы для всех операций
-      const statsPromises = statsSnapshot.docs.map(async (doc) => {
-        const data = await doc.data();
-        totalGames += data.gamesPlayed || 0;
-        totalStats.timeUnderSlowEffect += data.timeUnderSlowEffect || 0;
-        totalStats.totalPlayTime += data.totalPlayTime || 0;
+      stats.forEach(stat => {
+        totalStats.totalPlayTime += stat.totalPlayTime || 0;
+        totalStats.timeUnderSlowEffect += stat.timeUnderSlowEffect || 0;
+        totalStats.gamesPlayed += stat.gamesPlayed || 0;
+        totalStats.deathsByAnvil += stat.deathsByAnvil || 0;
         
-        if (data.itemsCaught) {
-          Object.entries(data.itemsCaught).forEach(([item, count]) => {
-            totalStats.itemsCaught[item] = (totalStats.itemsCaught[item] || 0) + (count as number);
+        // Объединяем статистику пойманных предметов
+        if (stat.itemsCaught) {
+          Object.entries(stat.itemsCaught).forEach(([item, count]) => {
+            const key = item as GameObject['type'];
+            if (key in totalStats.itemsCaught && typeof count === 'number') {
+              totalStats.itemsCaught[key] = (totalStats.itemsCaught[key] || 0) + count;
+            }
           });
         }
       });
-
-      // Ждем завершения всех операций
-      await Promise.all(statsPromises);
       
-      // Получаем топ-100 игроков
-      const top100Query = query(collection(db, 'stats'), orderBy('highScore', 'desc'), limit(100));
-      const top100Snapshot = await getDocs(top100Query);
-      const top100 = top100Snapshot.docs.map(doc => ({
-        id: doc.id,
-        score: doc.data().highScore
-      }));
+      // Формируем top100 с id документа
+      const top100 = statsSnapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          score: doc.data().highScore || 0
+        }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 100);
       
       setAdminStats({
-        totalPlayers,
-        totalGames,
+        totalPlayers: loyaltyCards.length,
+        totalGames: totalStats.gamesPlayed,
         totalStats,
         top100
       });
     } catch (error) {
-      console.error('Ошибка загрузки админ-статистики:', error);
-    }
-  };
-
-  // Добавляем обработчик авторизации админа
-  const handleAdminAuth = async () => {
-    if (adminPassword === 'yourpassword') {
-      setIsAdminAuthorized(true);
-      await loadAdminStats(); // Загружаем данные только после успешной авторизации
-    } else {
-      alert('Неверный пароль');
+      console.error('Ошибка при загрузке админ-статистики:', error);
     }
   };
 
   // Добавляем рендер страницы админ-статистики
   const renderAdminStats = () => {
-    if (!isAdminAuthorized) {
-      return (
-        <div style={{
-          width: '90%',
-          maxWidth: '600px',
-          margin: '0 auto',
-          minHeight: '100dvh',
-          boxSizing: 'border-box',
-          padding: '40px 0',
-          textAlign: 'center',
-          zIndex: 1
-        }}>
-          <h2 style={{ fontSize: '24px', marginBottom: '20px', color: '#fff' }}>Админ-панель</h2>
-          <input
-            type="password"
-            value={adminPassword}
-            onChange={(e) => setAdminPassword(e.target.value)}
-            placeholder="Введите пароль"
-            style={{
-              padding: '10px',
-              fontSize: '14px',
-              width: '200px',
-              marginBottom: '10px',
-              borderRadius: '5px',
-              border: 'none'
-            }}
-          />
-          <button
-            onClick={handleAdminAuth}
-            style={{
-              padding: '10px',
-              fontSize: '14px',
-              backgroundColor: '#E50046',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              display: 'block',
-              margin: '0 auto'
-            }}
-          >
-            Войти
-          </button>
-        </div>
-      );
-    }
-
     return (
       <div style={{
         width: '90%',
@@ -2658,7 +2645,7 @@ const GameCanvas: React.FC = () => {
         zIndex: 1,
         color: '#fff'
       }}>
-        <h2 style={{ fontSize: '24px', marginBottom: '20px' }}>Админ-статистика</h2>
+        <h2 style={{ fontSize: '24px', marginBottom: '20px' }}>Общая статистика</h2>
         
         <div style={{
           background: 'rgba(255, 255, 255, 0.1)',
@@ -2698,25 +2685,6 @@ const GameCanvas: React.FC = () => {
             </div>
           ))}
         </div>
-
-        <button
-          onClick={() => {
-            setIsAdminAuthorized(false);
-            setAdminPassword('');
-          }}
-          style={{
-            padding: '10px',
-            fontSize: '14px',
-            backgroundColor: '#E50046',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            marginTop: '20px'
-          }}
-        >
-          Выйти
-        </button>
       </div>
     );
   };
@@ -2725,8 +2693,7 @@ const GameCanvas: React.FC = () => {
   useEffect(() => {
     if (window.location.pathname === '/stats') {
       setGameState('adminStats');
-      // Не загружаем данные сразу, ждем авторизации
-      setIsAdminAuthorized(false);
+      loadAdminStats(); // Загружаем данные сразу
     }
   }, []);
 
@@ -2765,11 +2732,20 @@ const GameCanvas: React.FC = () => {
         // Ждем завершения всех операций
         await Promise.all(statsPromises);
         
+        // Формируем totalStats с нужными полями
+        const fullTotalStats: GameStats = {
+          gamesPlayed: totalGames,
+          totalPlayTime: totalStats.totalPlayTime,
+          deathsByAnvil: 0, // Можно добавить подсчет, если нужно
+          itemsCaught: totalStats.itemsCaught,
+          timeUnderSlowEffect: totalStats.timeUnderSlowEffect,
+          highScore: 0 // Можно добавить подсчет максимального рекорда, если нужно
+        };
         setAdminStats(prev => ({
           ...prev,
           totalPlayers: statsSnapshot.size,
           totalGames,
-          totalStats
+          totalStats: fullTotalStats
         }));
       } catch (error) {
         console.error('Ошибка при загрузке общей статистики:', error);
