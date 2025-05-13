@@ -2093,9 +2093,10 @@ const GameCanvas: React.FC = () => {
           padding: 10,
           background: 'rgba(255, 255, 255, 0.9)',
           borderRadius: 10,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          flexShrink: 0
         }}>
-          <img src="/assets/ticket.png" alt="Билетик" style={{ width: 40, height: 40, objectFit: 'contain' }} />
+          <img src="/assets/ticket.png" alt="Билетик" style={{ width: 40, height: 40, objectFit: 'contain', flexShrink: 0 }} />
           <div style={{ fontSize: 14, fontWeight: 600, textAlign: 'left', color: '#111' }}>
             Ловите билетики и получайте приятные подарки!
           </div>
@@ -2116,7 +2117,8 @@ const GameCanvas: React.FC = () => {
             border: 'none',
             borderRadius: '5px',
             cursor: 'pointer',
-            marginTop: 20
+            marginTop: 20,
+            flexShrink: 0
           }}
         >
           Назад
@@ -2125,13 +2127,13 @@ const GameCanvas: React.FC = () => {
     );
   };
 
-  // --- Страница подарка ---
-  const renderGift = () => (
+  const renderPrize100 = () => (
     <div style={{
       width: '90%',
       maxWidth: '600px',
       margin: '0 auto',
       minHeight: '100vh',
+      maxHeight: '100vh',
       boxSizing: 'border-box',
       padding: '40px 0',
       textAlign: 'center',
@@ -2140,13 +2142,54 @@ const GameCanvas: React.FC = () => {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: 8
+      gap: 8,
+      color: '#fff'
     }}>
-      <h2 style={{ fontSize: '16px', marginBottom: '5px' }}>Ваш тройной кешбэк!</h2>
-      <div style={{ fontSize: '22px', marginBottom: '5px' }}>На покупки от 1500 рублей</div>
-      <div style={{ fontSize: '18px', marginBottom: '5px' }}>Покажите QR-код в магазине</div>
+      <h2 style={{ fontSize: '20px', marginBottom: '5px', color: '#fff' }}>Скидка 100 рублей</h2>
+      <div style={{ fontSize: '18px', marginBottom: '5px', color: '#fff' }}>На покупки от 1000 рублей</div>
+      <div style={{ fontSize: '18px', marginBottom: '5px', color: '#fff' }}>Покажите QR-код в магазине</div>
+      <img src="/assets/coupon.svg" alt="QR" style={{ width: 180, marginBottom: 5 }} />
+      <button
+        onClick={() => setShowPrize100(false)}
+        style={{
+          padding: '10px',
+          fontSize: '14px',
+          backgroundColor: '#E50046',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          marginTop: 10
+        }}
+      >
+        Назад
+      </button>
+    </div>
+  );
+
+  const renderGift = () => (
+    <div style={{
+      width: '90%',
+      maxWidth: '600px',
+      margin: '0 auto',
+      minHeight: '100vh',
+      maxHeight: '100vh',
+      boxSizing: 'border-box',
+      padding: '40px 0',
+      textAlign: 'center',
+      zIndex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      color: '#fff'
+    }}>
+      <h2 style={{ fontSize: '16px', marginBottom: '5px', color: '#fff' }}>Ваш тройной кешбэк!</h2>
+      <div style={{ fontSize: '22px', marginBottom: '5px', color: '#fff' }}>На покупки от 1500 рублей</div>
+      <div style={{ fontSize: '18px', marginBottom: '5px', color: '#fff' }}>Покажите QR-код в магазине</div>
       <img src="/assets/coupon1.svg" alt="QR" style={{ width: 180, marginBottom: 5 }} />
-      <div style={{ fontSize: '18px', marginBottom: '5px' }}>или примените промокод в приложении</div>
+      <div style={{ fontSize: '18px', marginBottom: '5px', color: '#fff' }}>или примените промокод в приложении</div>
       <div style={{ 
         display: 'flex', 
         alignItems: 'center', 
@@ -2398,45 +2441,6 @@ const GameCanvas: React.FC = () => {
   }, []);
 
   // Добавляю компонент страницы приза 100 руб
-  const renderPrize100 = () => (
-    <div style={{
-      width: '90%',
-      maxWidth: '600px',
-      margin: '0 auto',
-      minHeight: '100vh',
-      boxSizing: 'border-box',
-      padding: '40px 0',
-      textAlign: 'center',
-      zIndex: 1,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 8
-    }}>
-      <h2 style={{ fontSize: '20px', marginBottom: '5px' }}>Скидка 100 рублей</h2>
-      <div style={{ fontSize: '18px', marginBottom: '5px' }}>На покупки от 1000 рублей</div>
-      <div style={{ fontSize: '18px', marginBottom: '5px' }}>Покажите QR-код в магазине</div>
-      <img src="/assets/coupon.svg" alt="QR" style={{ width: 180, marginBottom: 5 }} />
-      <button
-        onClick={() => setShowPrize100(false)}
-        style={{
-          padding: '10px',
-          fontSize: '14px',
-          backgroundColor: '#E50046',
-          color: 'white',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer',
-          marginTop: 10
-        }}
-      >
-        Назад
-      </button>
-    </div>
-  );
-
-  // Добавляю компонент renderWhereCard
   const renderWhereCard = () => (
     <div style={{
       width: '90%',
