@@ -779,7 +779,7 @@ const GameCanvas: React.FC = () => {
         const safeAreaBottom = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sab') || '0');
         ctx.save();
         const basketCenterX = basketX + basketWidth / 2;
-        const basketY = dimensions.height - basketHeight - safeAreaBottom - 40;
+        const basketY = dimensions.height - basketHeight - safeAreaBottom - 20;
         ctx.translate(basketCenterX, basketY + basketHeight / 2);
         ctx.rotate(basketTilt);
         ctx.drawImage(
@@ -843,10 +843,17 @@ const GameCanvas: React.FC = () => {
       // Вычисляем доступную высоту с учетом безопасных зон
       const availableHeight = window.innerHeight - topSafeArea - bottomSafeArea;
       
+      // Устанавливаем размеры canvas
       setDimensions({
         width: window.innerWidth,
         height: availableHeight
       });
+
+      // Обновляем размеры canvas элемента
+      if (canvasRef.current) {
+        canvasRef.current.width = window.innerWidth;
+        canvasRef.current.height = availableHeight;
+      }
     };
 
     updateDimensions();
@@ -860,9 +867,31 @@ const GameCanvas: React.FC = () => {
       const vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty('--vh', `${vh}px`);
       
-      // Добавляем безопасные зоны
-      const topSafeArea = window.safeAreaInsets?.top || 0;
-      const bottomSafeArea = window.safeAreaInsets?.bottom || 0;
+      // Определяем безопасные зоны с учетом браузера
+      let topSafeArea = 0;
+      let bottomSafeArea = 0;
+
+      // Для iOS Safari
+      if (window.safeAreaInsets) {
+        topSafeArea = window.safeAreaInsets.top;
+        bottomSafeArea = window.safeAreaInsets.bottom;
+      } else {
+        // Для других браузеров используем фиксированные значения
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        
+        if (isIOS && isSafari) {
+          // Для iOS Safari
+          topSafeArea = 44; // Стандартная высота статус-бара iOS
+          bottomSafeArea = 34; // Стандартная высота нижней панели iOS
+        } else {
+          // Для Chrome и других браузеров
+          topSafeArea = 0;
+          bottomSafeArea = 0;
+        }
+      }
+
+      // Устанавливаем CSS-переменные
       document.documentElement.style.setProperty('--sat', `${topSafeArea}px`);
       document.documentElement.style.setProperty('--sab', `${bottomSafeArea}px`);
     };
@@ -1037,7 +1066,7 @@ const GameCanvas: React.FC = () => {
   const handleCollision = (obj: GameObject) => {
     const item = itemsInfo.find(i => i.type === obj.type);
     const basketCenterX = basketX + 50 * basketScale;
-    const basketY = dimensions.height - 80 * basketScale - 40;
+    const basketY = dimensions.height - 80 * basketScale - 20;
     if (item) {
       if (item.floatText) {
         setFloatingText({ text: item.floatText, x: basketCenterX, y: basketY, opacity: 1 });
@@ -2669,7 +2698,9 @@ const GameCanvas: React.FC = () => {
             background: 'transparent',
             touchAction: 'none',
             zIndex: 2,
-            position: 'relative'
+            position: 'relative',
+            marginTop: 'var(--sat, 0px)',
+            marginBottom: 'var(--sab, 0px)'
           }}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
