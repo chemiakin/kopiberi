@@ -901,7 +901,7 @@ const GameCanvas: React.FC = () => {
     return () => window.removeEventListener('resize', setSafeAreaVariables);
   }, []);
 
-  // Добавляю meta-тег viewport для iOS
+  // Добавляю универсальные стили и meta viewport
   useEffect(() => {
     if (!document.querySelector('meta[name="viewport"][content*="viewport-fit=cover"]')) {
       const meta = document.createElement('meta');
@@ -909,13 +909,14 @@ const GameCanvas: React.FC = () => {
       meta.content = 'width=device-width, initial-scale=1, viewport-fit=cover';
       document.head.appendChild(meta);
     }
-    // Добавляю универсальные стили для устранения отступов и скролла
     const style = document.createElement('style');
     style.innerHTML = `
       html, body, #root {
         height: 100%;
-        margin: 0 !important;
-        padding: 0 !important;
+        min-height: 100dvh;
+        width: 100vw;
+        margin: 0;
+        padding: 0;
         border: 0;
         box-sizing: border-box;
         background: transparent !important;
@@ -925,6 +926,7 @@ const GameCanvas: React.FC = () => {
         min-height: 100dvh;
         min-width: 100vw;
         background: url('/assets/background.png') center/cover no-repeat fixed !important;
+        position: relative;
       }
       canvas {
         display: block;
@@ -935,8 +937,11 @@ const GameCanvas: React.FC = () => {
         margin: 0 !important;
         padding: 0 !important;
         background: transparent !important;
-        position: relative;
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
         z-index: 2;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        padding-top: env(safe-area-inset-top, 0px);
       }
       body {
         overscroll-behavior-y: contain;
