@@ -316,6 +316,7 @@ const GameCanvas: React.FC = () => {
   // useState для загрузки данных
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [userPlace, setUserPlace] = useState<number | null>(null);
+  const [isLeaderboardLoading, setIsLeaderboardLoading] = useState(false);
   // Добавляю состояние для показа страницы приза 100 руб
   const [showPrize100, setShowPrize100] = useState(false);
   // Добавляю состояние для страницы "Где найти номер карты"
@@ -421,6 +422,7 @@ const GameCanvas: React.FC = () => {
           bgImg.onload = resolve;
           bgImg.onerror = reject;
         });
+        
         setBackgroundImage(bgImg);
         const rootDiv = document.getElementById('root');
         if (rootDiv) {
@@ -2010,43 +2012,55 @@ const GameCanvas: React.FC = () => {
       margin: '0 auto',
       minHeight: '100dvh',
       maxHeight: '100dvh',
-      overflowY: 'auto',
       boxSizing: 'border-box',
-      padding: '40px 0',
+      padding: '40px 0 0 0',
       textAlign: 'center',
       zIndex: 1,
-      color: '#fff'
+      color: '#fff',
+      display: 'flex',
+      flexDirection: 'column',
+      position: 'relative',
+      background: 'none'
     }}>
-      <h2 style={{ fontSize: 'clamp(24px, 5vw, 32px)', marginBottom: '20px' }}>
-        Статистика игрока
-      </h2>
-      <div style={{ textAlign: 'left', marginBottom: '20px' }}>
-        <p>Количество игр: {gameStats.gamesPlayed}</p>
-        <p>Время в игре: {Math.floor(gameStats.totalPlayTime / 1000)} сек</p>
-        <p>Смертей от наковальни: {gameStats.deathsByAnvil}</p>
-        <p>Время под замедлением: {Math.floor(gameStats.timeUnderSlowEffect / 1000)} сек</p>
-        <p>Рекорд: {gameStats.highScore}</p>
-        <p>Поймано билетов: {gameStats.itemsCaught.ticket || 0}</p>
-        <h3 style={{ marginTop: '20px' }}>Пойманные предметы:</h3>
-        {Object.entries(gameStats.itemsCaught).map(([type, count]) => (
-          <p key={type}>{type}: {count}</p>
-        ))}
-      </div>
+      <div
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          maxHeight: 'calc(100dvh - 80px - env(safe-area-inset-bottom, 0px))',
+          paddingBottom: 24,
+          boxSizing: 'border-box'
+        }}
+      >
+        <h2 style={{ fontSize: 'clamp(24px, 5vw, 32px)', marginBottom: '20px' }}>
+          Статистика игрока
+        </h2>
+        <div style={{ textAlign: 'left', marginBottom: '20px' }}>
+          <p>Количество игр: {gameStats.gamesPlayed}</p>
+          <p>Время в игре: {Math.floor(gameStats.totalPlayTime / 1000)} сек</p>
+          <p>Смертей от наковальни: {gameStats.deathsByAnvil}</p>
+          <p>Время под замедлением: {Math.floor(gameStats.timeUnderSlowEffect / 1000)} сек</p>
+          <p>Рекорд: {gameStats.highScore}</p>
+          <p>Поймано билетов: {gameStats.itemsCaught.ticket || 0}</p>
+          <h3 style={{ marginTop: '20px' }}>Пойманные предметы:</h3>
+          {Object.entries(gameStats.itemsCaught).map(([type, count]) => (
+            <p key={type}>{type}: {count}</p>
+          ))}
+        </div>
 
-      <h2 style={{ fontSize: 'clamp(24px, 5vw, 32px)', marginTop: '40px', marginBottom: '20px' }}>
-        Общая статистика
-      </h2>
-      <div style={{ textAlign: 'left', marginBottom: '20px' }}>
-        <p>Всего игроков: {adminStats.totalPlayers}</p>
-        <p>Всего игр: {adminStats.totalGames}</p>
-        <p>Общее время в игре: {Math.floor(adminStats.totalStats.totalPlayTime / 1000)} сек</p>
-        <p>Общее время под замедлением: {Math.floor(adminStats.totalStats.timeUnderSlowEffect / 1000)} сек</p>
-        <h3 style={{ marginTop: '20px' }}>Всего поймано предметов:</h3>
-        {Object.entries(adminStats.totalStats.itemsCaught).map(([type, count]) => (
-          <p key={type}>{type}: {count}</p>
-        ))}
+        <h2 style={{ fontSize: 'clamp(24px, 5vw, 32px)', marginTop: '40px', marginBottom: '20px' }}>
+          Общая статистика
+        </h2>
+        <div style={{ textAlign: 'left', marginBottom: '20px' }}>
+          <p>Всего игроков: {adminStats.totalPlayers}</p>
+          <p>Всего игр: {adminStats.totalGames}</p>
+          <p>Общее время в игре: {Math.floor(adminStats.totalStats.totalPlayTime / 1000)} сек</p>
+          <p>Общее время под замедлением: {Math.floor(adminStats.totalStats.timeUnderSlowEffect / 1000)} сек</p>
+          <h3 style={{ marginTop: '20px' }}>Всего поймано предметов:</h3>
+          {Object.entries(adminStats.totalStats.itemsCaught).map(([type, count]) => (
+            <p key={type}>{type}: {count}</p>
+          ))}
+        </div>
       </div>
-
       <button
         onClick={() => {
           handleButtonClick();
@@ -2059,7 +2073,17 @@ const GameCanvas: React.FC = () => {
           color: 'white',
           border: 'none',
           borderRadius: '5px',
-          cursor: 'pointer'
+          cursor: 'pointer',
+          position: 'sticky',
+          bottom: 0,
+          width: '100%',
+          maxWidth: 400,
+          margin: '0 auto',
+          marginBottom: 'env(safe-area-inset-bottom, 0px)',
+          zIndex: 10,
+          boxShadow: '0 -2px 8px #0002',
+          backgroundClip: 'padding-box',
+          minHeight: 48
         }}
       >
         Назад
@@ -2321,25 +2345,52 @@ const GameCanvas: React.FC = () => {
           maxHeight: 'calc(100dvh - 200px)',
           overflowY: 'auto'
         }}>
-          {leaderboard.map((item, idx) => (
-            <div key={item.id} style={{
-              background: '#fff',
-              borderRadius: 10,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-              padding: 10,
-              fontSize: 16,
-              fontWeight: 700,
-              color: idx === 0 ? '#d4af37' : '#222',
-              border: idx === 0 ? '2px solid #d4af37' : '2px solid #eee',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <span>#{idx + 1} ID: {item.id}</span>
-              <span>Рекорд: {item.score}</span>
-            </div>
-          ))}
+          {isLeaderboardLoading ? (
+            Array.from({ length: 10 }).map((_, idx) => (
+              <div key={idx} style={{
+                background: 'linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%)',
+                borderRadius: 10,
+                height: 38,
+                width: '100%',
+                animation: 'skeleton-loading 1.2s infinite linear',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                border: '2px solid #eee',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <span style={{ width: 120, height: 18, background: '#e0e0e0', borderRadius: 4, marginLeft: 16 }}></span>
+                <span style={{ width: 80, height: 18, background: '#e0e0e0', borderRadius: 4, marginRight: 16 }}></span>
+              </div>
+            ))
+          ) : (
+            leaderboard.map((item, idx) => (
+              <div key={item.id} style={{
+                background: '#fff',
+                borderRadius: 10,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                padding: 10,
+                fontSize: 16,
+                fontWeight: 700,
+                color: idx === 0 ? '#d4af37' : '#222',
+                border: idx === 0 ? '2px solid #d4af37' : '2px solid #eee',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <span>#{idx + 1} ID: {item.id}</span>
+                <span>Рекорд: {item.score}</span>
+              </div>
+            ))
+          )}
         </div>
+        <style>{`
+          @keyframes skeleton-loading {
+            0% { background-position: -200px 0; }
+            100% { background-position: calc(200px + 100%) 0; }
+          }
+        `}</style>
         <button
           onClick={() => setGameState('profile')}
           style={{
@@ -2360,8 +2411,10 @@ const GameCanvas: React.FC = () => {
 
   useEffect(() => {
     if (gameState === 'leaderboard') {
+      setIsLeaderboardLoading(true);
       fetchLeaderboard().then((data) => {
         setLeaderboard(data);
+        setIsLeaderboardLoading(false);
       });
       if (loyaltyCard.number) {
         fetchUserPlace(loyaltyCard.number).then((place) => {
