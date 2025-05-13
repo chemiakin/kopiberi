@@ -287,9 +287,12 @@ const GameCanvas: React.FC = () => {
   const [screenGlow, setScreenGlow] = useState<{ color: string; intensity: number } | null>(null);
   const [objectRotations, setObjectRotations] = useState<{ [key: string]: number }>({});
   const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null);
+  // Временно отключаем звуки
+  /*
   const [sounds, setSounds] = useState<{ [key: string]: HTMLAudioElement }>({});
   const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
   const backgroundMusicTimerRef = useRef<number | null>(null);
+  */
   const [basketTilt, setBasketTilt] = useState(0);
   const lastBasketX = useRef(basketX);
   const [floatingText, setFloatingText] = useState<{ text: string; x: number; y: number; opacity: number } | null>(null);
@@ -437,114 +440,10 @@ const GameCanvas: React.FC = () => {
     loadImages();
   }, []);
 
-  // Загрузка звуков
-  useEffect(() => {
-    // Временно отключаем загрузку звуков
-    /*
-    const loadSounds = async () => {
-      const soundNames = [
-        'button',     // Звук нажатия кнопки
-        'effect',     // Звук при ловле предмета-эффекта
-        'negative',   // Звук при ловле негативного предмета
-        'positive',   // Звук при ловле позитивного предмета
-        'back_sound1', // Фоновая музыка 1
-        'back_sound2', // Фоновая музыка 2
-        'back_sound3', // Фоновая музыка 3
-        'back_sound4'  // Фоновая музыка 4
-      ];
-      
-      const loadedSounds: { [key: string]: HTMLAudioElement } = {};
-      
-      for (const name of soundNames) {
-        const audio = new Audio(`/assets/sounds/${name}.mp3`);
-        if (['negative', 'effect', 'positive'].includes(name)) {
-          audio.volume = 0.2;
-        } else if (name.startsWith('back_sound')) {
-          audio.volume = 0.4;
-        } else {
-          audio.volume = 0.4;
-        }
-        if (name.startsWith('back_sound')) {
-          audio.loop = false;
-        }
-        loadedSounds[name] = audio;
-      }
-      
-      setSounds(loadedSounds);
-    };
-
-    loadSounds();
-    */
-  }, []);
-
-  // Функция для воспроизведения следующей фоновой музыки
-  const playNextBackgroundMusic = () => {
-    // Временно отключаем фоновую музыку
-    /*
-    if (backgroundMusicRef.current) {
-      backgroundMusicRef.current.pause();
-    }
-
-    const musicNumber = Math.floor(Math.random() * 4) + 1;
-    const nextMusic = sounds[`back_sound${musicNumber}`];
-    
-    if (nextMusic) {
-      nextMusic.currentTime = 0;
-      const playPromise = nextMusic.play();
-      
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          console.log('Автовоспроизведение отключено, музыка начнется после взаимодействия пользователя');
-        });
-      }
-      
-      backgroundMusicRef.current = nextMusic;
-
-      nextMusic.addEventListener('ended', () => {
-        if (backgroundMusicTimerRef.current) {
-          clearTimeout(backgroundMusicTimerRef.current);
-        }
-        backgroundMusicTimerRef.current = window.setTimeout(playNextBackgroundMusic, 100);
-      });
-    }
-    */
-  };
-
-  // Запуск фоновой музыки при старте игры
-  useEffect(() => {
-    // Временно отключаем фоновую музыку
-    /*
-    if (gameState === 'playing') {
-      playNextBackgroundMusic();
-    } else if (backgroundMusicRef.current) {
-      backgroundMusicRef.current.pause();
-    }
-
-    return () => {
-      if (backgroundMusicRef.current) {
-        backgroundMusicRef.current.pause();
-      }
-      if (backgroundMusicTimerRef.current) {
-        clearTimeout(backgroundMusicTimerRef.current);
-      }
-    };
-    */
-  }, [gameState, sounds]);
-
-  // Функция для воспроизведения звука
-  const playSound = (soundName: string) => {
-    // Временно отключаем звуки
-    /*
-    if (fpsRef.current < 20) return; // Отключаем звук при низком FPS
-    const sound = sounds[soundName];
-    if (sound) {
-      sound.currentTime = 0;
-      const playPromise = sound.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {});
-      }
-    }
-    */
+  // Обновляем все обработчики кнопок
+  const handleButtonClick = () => {
+    // Временно отключаем звук кнопки
+    // playSound('button');
   };
 
   // --- Данные по предметам с шансами и описаниями ---
@@ -1137,7 +1036,7 @@ const GameCanvas: React.FC = () => {
       if ([
         'champignon','cucumber','eggplant','kebab','salad'
       ].includes(obj.type)) {
-        playSound('positive');
+        // playSound('positive');
       }
       // --- Во время rainEffect негативные и эффекты не действуют ---
       if (rainEffect && [
@@ -1167,7 +1066,7 @@ const GameCanvas: React.FC = () => {
           break;
         case 'anvil':
           if (!shieldEffect && !rainEffect) {
-            playSound('negative');
+            // playSound('negative');
             setGameState('result');
             setFinalScore(score);
             setGameStats(prev => {
@@ -1183,7 +1082,7 @@ const GameCanvas: React.FC = () => {
           break;
         case 'drop':
           if (!effectTimersRef.current.drop) {
-            playSound('effect');
+            // playSound('effect');
             setRainEffect(true);
             effectTimersRef.current.drop = window.setTimeout(() => {
               setRainEffect(false);
@@ -1193,7 +1092,7 @@ const GameCanvas: React.FC = () => {
           break;
         case 'magnet':
           if (!effectTimersRef.current.magnet) {
-            playSound('effect');
+            // playSound('effect');
             setMagnetEffect(true);
             setScreenGlow({ color: '#2196F3', intensity: 1 });
             effectTimersRef.current.magnet = window.setTimeout(() => {
@@ -1205,7 +1104,7 @@ const GameCanvas: React.FC = () => {
           break;
         case 'shield':
           if (!effectTimersRef.current.shield) {
-            playSound('effect');
+            // playSound('effect');
             setShieldEffect(true);
             setScreenGlow({ color: '#FF9800', intensity: 1 });
             effectTimersRef.current.shield = window.setTimeout(() => {
@@ -1217,7 +1116,7 @@ const GameCanvas: React.FC = () => {
           break;
         case 'sock':
           if (!effectTimersRef.current.sock && !shieldEffect) {
-            playSound('negative');
+            // playSound('negative');
             setBasketScale(0.5);
             setTimeLeft(prev => Math.max(0, prev - 2));
             effectTimersRef.current.sock = window.setTimeout(() => {
@@ -1228,7 +1127,7 @@ const GameCanvas: React.FC = () => {
           break;
         case 'puffer':
           if (!effectTimersRef.current.puffer && !shieldEffect) {
-            playSound('negative');
+            // playSound('negative');
             setSlowEffect(true);
             setScreenGlow({ color: '#4CAF50', intensity: 1 });
             slowEffectStartTimeRef.current = Date.now();
@@ -1261,12 +1160,6 @@ const GameCanvas: React.FC = () => {
           break;
       }
     }
-  };
-
-  // Обновляем все обработчики кнопок
-  const handleButtonClick = () => {
-    // Временно отключаем звук кнопки
-    // playSound('button');
   };
 
   // Компонент анимированного счета
