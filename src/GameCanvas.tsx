@@ -2636,14 +2636,27 @@ const GameCanvas: React.FC = () => {
     }
   }, [gameState]);
 
+  // Добавляем useEffect для установки CSS-переменных
+  useEffect(() => {
+    const setSafeAreaVariables = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+
+    setSafeAreaVariables();
+    window.addEventListener('resize', setSafeAreaVariables);
+    return () => window.removeEventListener('resize', setSafeAreaVariables);
+  }, []);
+
   return (
     <div style={{ 
       position: 'relative', 
       width: '100%', 
-      height: '100vh',
+      height: 'calc(var(--vh, 1vh) * 100)',
       fontFamily: '"Play", Arial, sans-serif',
       background: 'transparent',
-      zIndex: 1
+      zIndex: 1,
+      overflow: 'hidden'
     }}>
       {gameState === 'playing' && (
         <canvas
@@ -2669,110 +2682,160 @@ const GameCanvas: React.FC = () => {
         <div style={{
           zIndex: 3,
           position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '100%',
-          maxWidth: '800px'
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          padding: '20px 0',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
         }}>{renderMenu()}</div>
       )}
       {gameState === 'result' && (
         <div style={{
           zIndex: 3,
           position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '100%',
-          maxWidth: '800px'
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          padding: '20px 0',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
         }}>{showGift ? renderGift() : renderResult()}</div>
       )}
       {gameState === 'profile' && (
         <div style={{
           zIndex: 3,
           position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '100%',
-          maxWidth: '800px'
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          padding: '20px 0',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
         }}>{renderProfile()}</div>
       )}
       {gameState === 'auth' && (
         <div style={{
           zIndex: 3,
           position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '100%',
-          maxWidth: '800px'
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          padding: '20px 0',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
         }}>{renderAuth()}</div>
       )}
       {gameState === 'stats' && (
         <div style={{
           zIndex: 3,
           position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '100%',
-          maxWidth: '800px'
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          padding: '20px 0',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
         }}>{renderStats()}</div>
       )}
       {gameState === 'prizes' && (
         <div style={{
           zIndex: 3,
           position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '100%',
-          maxWidth: '800px'
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          padding: '20px 0',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
         }}>{renderPrizes()}</div>
       )}
       {gameState === 'howtoplay' && (
         <div style={{
           zIndex: 3,
           position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '100%',
-          maxWidth: '800px'
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          padding: '20px 0',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
         }}>{renderHowToPlay()}</div>
       )}
       {gameState === 'prizeinfo' && (
         <div style={{
           zIndex: 3,
           position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '100%',
-          maxWidth: '800px'
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          padding: '20px 0',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
         }}>{renderPrizeInfo()}</div>
       )}
       {gameState === 'leaderboard' && (
         <div style={{
           zIndex: 3,
           position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '100%',
-          maxWidth: '800px'
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          padding: '20px 0',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
         }}>{renderLeaderboard()}</div>
       )}
       {gameState === 'adminStats' && (
         <div style={{
           zIndex: 3,
           position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '100%',
-          maxWidth: '800px'
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          padding: '20px 0',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
         }}>{renderAdminStats()}</div>
       )}
       {renderFloatingText()}
