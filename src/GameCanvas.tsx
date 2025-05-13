@@ -52,7 +52,7 @@ const PrizeList: React.FC<{ ticketsCount: number, setShowPrize100: (v: boolean) 
   const [copied500, setCopied500] = useState(false);
   // Всегда три карточки, неактивные если билетов не хватает
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto', maxHeight: '100vh', paddingBottom: 10 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto', maxHeight: '100dvh', paddingBottom: 10 }}>
       {/* Приз 1 */}
       <div style={{
         width: '100%',
@@ -429,7 +429,7 @@ const GameCanvas: React.FC = () => {
           rootDiv.style.backgroundPosition = 'center';
           rootDiv.style.backgroundAttachment = 'fixed';
           rootDiv.style.backgroundRepeat = 'no-repeat';
-          rootDiv.style.minHeight = '100vh';
+          rootDiv.style.minHeight = '100dvh';
           rootDiv.style.margin = '0';
           rootDiv.style.padding = '0';
         }
@@ -1334,8 +1334,8 @@ const GameCanvas: React.FC = () => {
         width: '90%',
         maxWidth: '800px',
         margin: '0 auto',
-        minHeight: '100vh',
-        maxHeight: '100vh',
+        minHeight: '100dvh',
+        maxHeight: '100dvh',
         boxSizing: 'border-box',
         padding: '40px 0',
         textAlign: 'center',
@@ -1410,8 +1410,8 @@ const GameCanvas: React.FC = () => {
         width: '90%',
         maxWidth: '600px',
         margin: '0 auto',
-        minHeight: '100vh',
-        maxHeight: '100vh',
+        minHeight: '100dvh',
+        maxHeight: '100dvh',
         overflowY: 'auto',
         boxSizing: 'border-box',
         padding: '40px 0',
@@ -1551,8 +1551,8 @@ const GameCanvas: React.FC = () => {
       width: '90%',
       maxWidth: '600px',
       margin: '0 auto',
-      minHeight: '100vh',
-      maxHeight: '100vh',
+      minHeight: '100dvh',
+      maxHeight: '100dvh',
       boxSizing: 'border-box',
       padding: '40px 0',
       textAlign: 'center',
@@ -1571,7 +1571,7 @@ const GameCanvas: React.FC = () => {
         padding: '0 0 10px 0',
         borderRadius: '10px',
         background: 'rgba(0, 0, 0, 0.5)',
-        maxHeight: 'calc(100vh - 200px)'
+        maxHeight: 'calc(100dvh - 200px)'
       }}>
         {itemsInfo.map(item => (
           <div key={item.type} style={{
@@ -1617,8 +1617,8 @@ const GameCanvas: React.FC = () => {
       width: '90%',
       maxWidth: '600px',
       margin: '0 auto',
-      minHeight: '100vh',
-      maxHeight: '100vh',
+      minHeight: '100dvh',
+      maxHeight: '100dvh',
       overflowY: 'auto',
       boxSizing: 'border-box',
       padding: '40px 0',
@@ -1719,8 +1719,8 @@ const GameCanvas: React.FC = () => {
       width: '90%',
       maxWidth: '800px',
       margin: '0 auto',
-      minHeight: '100vh',
-      maxHeight: '100vh',
+      minHeight: '100dvh',
+      maxHeight: '100dvh',
       overflowY: 'auto',
       boxSizing: 'border-box',
       display: 'flex',
@@ -1819,8 +1819,8 @@ const GameCanvas: React.FC = () => {
       width: '90%',
       maxWidth: '800px',
       margin: '0 auto',
-      minHeight: '100vh',
-      maxHeight: '100vh',
+      minHeight: '100dvh',
+      maxHeight: '100dvh',
       overflowY: 'auto',
       boxSizing: 'border-box',
       padding: '40px 0',
@@ -2008,8 +2008,8 @@ const GameCanvas: React.FC = () => {
       width: '90%',
       maxWidth: '600px',
       margin: '0 auto',
-      minHeight: '100vh',
-      maxHeight: '100vh',
+      minHeight: '100dvh',
+      maxHeight: '100dvh',
       overflowY: 'auto',
       boxSizing: 'border-box',
       padding: '40px 0',
@@ -2074,8 +2074,8 @@ const GameCanvas: React.FC = () => {
         width: '90%',
         maxWidth: '800px',
         margin: '0 auto',
-        minHeight: '100vh',
-        maxHeight: '100vh',
+        minHeight: '100dvh',
+        maxHeight: '100dvh',
         boxSizing: 'border-box',
         padding: '40px 0',
         textAlign: 'center',
@@ -2099,7 +2099,7 @@ const GameCanvas: React.FC = () => {
             Ловите билетики и получайте приятные подарки!
           </div>
         </div>
-        <div style={{ flex: 1, overflowY: 'auto', maxHeight: 'calc(100vh - 200px)' }}>
+        <div style={{ flex: 1, overflowY: 'auto', maxHeight: 'calc(100dvh - 200px)' }}>
           <PrizeList ticketsCount={gameStats.itemsCaught.ticket || 0} setShowPrize100={setShowPrize100} />
         </div>
         <button
@@ -2130,8 +2130,8 @@ const GameCanvas: React.FC = () => {
       width: '90%',
       maxWidth: '600px',
       margin: '0 auto',
-      minHeight: '100vh',
-      maxHeight: '100vh',
+      minHeight: '100dvh',
+      maxHeight: '100dvh',
       boxSizing: 'border-box',
       padding: '40px 0',
       textAlign: 'center',
@@ -2170,8 +2170,8 @@ const GameCanvas: React.FC = () => {
       width: '90%',
       maxWidth: '600px',
       margin: '0 auto',
-      minHeight: '100vh',
-      maxHeight: '100vh',
+      minHeight: '100dvh',
+      maxHeight: '100dvh',
       boxSizing: 'border-box',
       padding: '40px 0',
       textAlign: 'center',
@@ -2299,8 +2299,8 @@ const GameCanvas: React.FC = () => {
         width: '90%',
         maxWidth: '600px',
         margin: '0 auto',
-        minHeight: '100vh',
-        maxHeight: '100vh',
+        minHeight: '100dvh',
+        maxHeight: '100dvh',
         boxSizing: 'border-box',
         padding: '40px 0',
         textAlign: 'center',
@@ -2318,7 +2318,7 @@ const GameCanvas: React.FC = () => {
           flexDirection: 'column', 
           gap: 10, 
           marginBottom: 30, 
-          maxHeight: 'calc(100vh - 200px)',
+          maxHeight: 'calc(100dvh - 200px)',
           overflowY: 'auto'
         }}>
           {leaderboard.map((item, idx) => (
@@ -2444,7 +2444,7 @@ const GameCanvas: React.FC = () => {
       width: '90%',
       maxWidth: '600px',
       margin: '0 auto',
-      minHeight: '100vh',
+      minHeight: '100dvh',
       boxSizing: 'border-box',
       padding: '40px 0',
       textAlign: 'center',
@@ -2552,7 +2552,7 @@ const GameCanvas: React.FC = () => {
           width: '90%',
           maxWidth: '600px',
           margin: '0 auto',
-          minHeight: '100vh',
+          minHeight: '100dvh',
           boxSizing: 'border-box',
           padding: '40px 0',
           textAlign: 'center',
@@ -2598,7 +2598,7 @@ const GameCanvas: React.FC = () => {
         width: '90%',
         maxWidth: '800px',
         margin: '0 auto',
-        minHeight: '100vh',
+        minHeight: '100dvh',
         boxSizing: 'border-box',
         padding: '40px 0',
         textAlign: 'center',
