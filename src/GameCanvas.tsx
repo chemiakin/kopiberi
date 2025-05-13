@@ -386,7 +386,7 @@ const GameCanvas: React.FC = () => {
   // Загрузка шрифта
   useEffect(() => {
     const link = document.createElement('link');
-    link.href = 'https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap';
+    link.href = 'https://fonts.googleapis.com/css2?family=Play:wght@400;700&display=swap';
     link.rel = 'stylesheet';
     document.head.appendChild(link);
   }, []);
@@ -896,11 +896,11 @@ const GameCanvas: React.FC = () => {
       }
 
       ctx.save();
-      ctx.font = '20px "Pixelify Sans", Arial, sans-serif';
+      ctx.font = '20px "Play", Arial, sans-serif';
       ctx.fillStyle = '#fff';
       ctx.textAlign = 'center';
       ctx.fillText('Счёт', dimensions.width / 2, 45);
-      ctx.font = 'bold 38px "Pixelify Sans", Arial, sans-serif';
+      ctx.font = 'bold 38px "Play", Arial, sans-serif';
       ctx.fillText(`${score}`, dimensions.width / 2, 85);
       ctx.restore();
 
@@ -1337,6 +1337,7 @@ const GameCanvas: React.FC = () => {
         maxWidth: '800px',
         margin: '0 auto',
         minHeight: '100vh',
+        maxHeight: '100vh',
         boxSizing: 'border-box',
         padding: '40px 0',
         textAlign: 'center',
@@ -1345,9 +1346,10 @@ const GameCanvas: React.FC = () => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 16
+        gap: 16,
+        overflowY: 'auto'
       }}>
-        <h2 style={{ fontSize: '32px', marginBottom: '10px' }}>Игра окончена!</h2>
+        <h2 style={{ fontSize: '32px', marginBottom: '10px', color: '#fff' }}>Игра окончена!</h2>
         <div style={{ fontSize: '20px', marginBottom: '10px', color: '#fff', fontWeight: 700, textShadow: '0 2px 8px #000' }}>{deathReason}</div>
         <AnimatedScore score={finalScore} isNewRecord={isNewRecord} />
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexDirection: 'column' }}>
@@ -1411,6 +1413,7 @@ const GameCanvas: React.FC = () => {
         maxWidth: '600px',
         margin: '0 auto',
         minHeight: '100vh',
+        maxHeight: '100vh',
         overflowY: 'auto',
         boxSizing: 'border-box',
         padding: '40px 0',
@@ -1443,7 +1446,8 @@ const GameCanvas: React.FC = () => {
           marginBottom: '10px',
           wordBreak: 'break-word',
           width: '100%',
-          textAlign: 'center'
+          textAlign: 'center',
+          color: '#fff'
         }}>
           Введите номер карты лояльности
         </h2>
@@ -1550,18 +1554,16 @@ const GameCanvas: React.FC = () => {
       maxWidth: '600px',
       margin: '0 auto',
       minHeight: '100vh',
+      maxHeight: '100vh',
       boxSizing: 'border-box',
-      padding: '40px 0 80px 0',
+      padding: '40px 0',
       textAlign: 'center',
       zIndex: 1,
       display: 'flex',
-      flexDirection: 'column',
-      height: '100vh',
-      position: 'relative',
-      overflow: 'hidden'
+      flexDirection: 'column'
     }}>
-      <h2 style={{ fontSize: '32px', marginBottom: '20px' }}>Как играть</h2>
-      <p style={{ fontSize: '10px', marginBottom: '20px' }}>
+      <h2 style={{ fontSize: '32px', marginBottom: '20px', color: '#fff' }}>Как играть</h2>
+      <p style={{ fontSize: '10px', marginBottom: '20px', color: '#fff' }}>
         Ловите предметы, двигая корзину влево и вправо, избегайте негативные предметы.
       </p>
       <div style={{
@@ -1570,7 +1572,8 @@ const GameCanvas: React.FC = () => {
         marginBottom: '20px',
         padding: '0 0 10px 0',
         borderRadius: '10px',
-        background: 'rgba(0, 0, 0, 0.5)'
+        background: 'rgba(0, 0, 0, 0.5)',
+        maxHeight: 'calc(100vh - 200px)'
       }}>
         {itemsInfo.map(item => (
           <div key={item.type} style={{
@@ -1583,7 +1586,7 @@ const GameCanvas: React.FC = () => {
           }}>
             <img src={item.img} alt={item.name} style={{ width: 48, height: 48, objectFit: 'contain', flexShrink: 0 }} />
             <div style={{ textAlign: 'left', flex: 1 }}>
-              <div style={{ fontWeight: 700, fontSize: 18 }}>{item.name}</div>
+              <div style={{ fontWeight: 700, fontSize: 18, color: '#fff' }}>{item.name}</div>
               <div style={{ fontSize: 14, color: '#d1d1d1' }}>{item.desc}</div>
             </div>
           </div>
@@ -1595,10 +1598,6 @@ const GameCanvas: React.FC = () => {
           setGameState('menu');
         }}
         style={{
-          position: 'sticky',
-          bottom: 0,
-          left: 0,
-          width: '100%',
           padding: '10px',
           fontSize: '14px',
           backgroundColor: '#E50046',
@@ -1606,7 +1605,7 @@ const GameCanvas: React.FC = () => {
           border: 'none',
           borderRadius: '8px',
           cursor: 'pointer',
-          marginTop: 10
+          marginTop: 'auto'
         }}
       >
         На главную
@@ -1621,6 +1620,7 @@ const GameCanvas: React.FC = () => {
       maxWidth: '600px',
       margin: '0 auto',
       minHeight: '100vh',
+      maxHeight: '100vh',
       overflowY: 'auto',
       boxSizing: 'border-box',
       padding: '40px 0',
@@ -1722,6 +1722,7 @@ const GameCanvas: React.FC = () => {
       maxWidth: '800px',
       margin: '0 auto',
       minHeight: '100vh',
+      maxHeight: '100vh',
       overflowY: 'auto',
       boxSizing: 'border-box',
       display: 'flex',
@@ -1821,16 +1822,17 @@ const GameCanvas: React.FC = () => {
       maxWidth: '800px',
       margin: '0 auto',
       minHeight: '100vh',
+      maxHeight: '100vh',
       overflowY: 'auto',
       boxSizing: 'border-box',
       padding: '40px 0',
       textAlign: 'center',
       zIndex: 1
     }}>
-      <h2 style={{ fontSize: '32px', marginBottom: '20px' }}>
+      <h2 style={{ fontSize: '32px', marginBottom: '20px', color: '#fff' }}>
         Профиль
       </h2>
-      <p style={{ fontSize: '12px', marginBottom: '20px' }}>
+      <p style={{ fontSize: '12px', marginBottom: '20px', color: '#fff' }}>
         Номер карты лояльности: {loyaltyCard.number}
       </p>
       <div style={{
@@ -2005,46 +2007,43 @@ const GameCanvas: React.FC = () => {
 
   const renderStats = () => (
     <div style={{
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      textAlign: 'center',
       width: '90%',
       maxWidth: '600px',
-      padding: '20px',
+      margin: '0 auto',
+      minHeight: '100vh',
+      maxHeight: '100vh',
+      overflowY: 'auto',
       boxSizing: 'border-box',
-      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-      borderRadius: '10px',
-      boxShadow: '0 0 10px rgba(0,0,0,0.1)',
+      padding: '40px 0',
+      textAlign: 'center',
       zIndex: 1,
-      color: '#111'
+      color: '#fff'
     }}>
-      <h2 style={{ fontSize: 'clamp(24px, 5vw, 32px)', marginBottom: '20px', color: '#111' }}>
+      <h2 style={{ fontSize: 'clamp(24px, 5vw, 32px)', marginBottom: '20px' }}>
         Статистика игрока
       </h2>
-      <div style={{ textAlign: 'left', marginBottom: '20px', color: '#111' }}>
+      <div style={{ textAlign: 'left', marginBottom: '20px' }}>
         <p>Количество игр: {gameStats.gamesPlayed}</p>
         <p>Время в игре: {Math.floor(gameStats.totalPlayTime / 1000)} сек</p>
         <p>Смертей от наковальни: {gameStats.deathsByAnvil}</p>
         <p>Время под замедлением: {Math.floor(gameStats.timeUnderSlowEffect / 1000)} сек</p>
         <p>Рекорд: {gameStats.highScore}</p>
         <p>Поймано билетов: {gameStats.itemsCaught.ticket || 0}</p>
-        <h3 style={{ marginTop: '20px', color: '#111' }}>Пойманные предметы:</h3>
+        <h3 style={{ marginTop: '20px' }}>Пойманные предметы:</h3>
         {Object.entries(gameStats.itemsCaught).map(([type, count]) => (
           <p key={type}>{type}: {count}</p>
         ))}
       </div>
 
-      <h2 style={{ fontSize: 'clamp(24px, 5vw, 32px)', marginTop: '40px', marginBottom: '20px', color: '#111' }}>
+      <h2 style={{ fontSize: 'clamp(24px, 5vw, 32px)', marginTop: '40px', marginBottom: '20px' }}>
         Общая статистика
       </h2>
-      <div style={{ textAlign: 'left', marginBottom: '20px', color: '#111' }}>
+      <div style={{ textAlign: 'left', marginBottom: '20px' }}>
         <p>Всего игроков: {adminStats.totalPlayers}</p>
         <p>Всего игр: {adminStats.totalGames}</p>
         <p>Общее время в игре: {Math.floor(adminStats.totalStats.totalPlayTime / 1000)} сек</p>
         <p>Общее время под замедлением: {Math.floor(adminStats.totalStats.timeUnderSlowEffect / 1000)} сек</p>
-        <h3 style={{ marginTop: '20px', color: '#111' }}>Всего поймано предметов:</h3>
+        <h3 style={{ marginTop: '20px' }}>Всего поймано предметов:</h3>
         {Object.entries(adminStats.totalStats.itemsCaught).map(([type, count]) => (
           <p key={type}>{type}: {count}</p>
         ))}
@@ -2078,10 +2077,13 @@ const GameCanvas: React.FC = () => {
         maxWidth: '800px',
         margin: '0 auto',
         minHeight: '100vh',
+        maxHeight: '100vh',
         boxSizing: 'border-box',
         padding: '40px 0',
         textAlign: 'center',
-        zIndex: 1
+        zIndex: 1,
+        display: 'flex',
+        flexDirection: 'column'
       }}>
         <div style={{
           display: 'flex',
@@ -2098,7 +2100,9 @@ const GameCanvas: React.FC = () => {
             Ловите билетики и получайте приятные подарки!
           </div>
         </div>
-        <PrizeList ticketsCount={gameStats.itemsCaught.ticket || 0} setShowPrize100={setShowPrize100} />
+        <div style={{ flex: 1, overflowY: 'auto', maxHeight: 'calc(100vh - 200px)' }}>
+          <PrizeList ticketsCount={gameStats.itemsCaught.ticket || 0} setShowPrize100={setShowPrize100} />
+        </div>
         <button
           onClick={() => {
             handleButtonClick();
@@ -2255,16 +2259,27 @@ const GameCanvas: React.FC = () => {
         maxWidth: '600px',
         margin: '0 auto',
         minHeight: '100vh',
+        maxHeight: '100vh',
         boxSizing: 'border-box',
         padding: '40px 0',
         textAlign: 'center',
-        zIndex: 1
+        zIndex: 1,
+        display: 'flex',
+        flexDirection: 'column'
       }}>
         <h2 style={{ fontSize: '24px', marginBottom: '10px', color: '#fff' }}>Лучшая десятка игроков</h2>
         <div style={{ fontSize: '18px', marginBottom: '20px', color: '#fff' }}>
           Ваше место {userPlace || '-'} из {leaderboard.length > 0 ? leaderboard[0].totalPlayers : 0}
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 30, maxHeight: 320, overflowY: 'auto' }}>
+        <div style={{ 
+          flex: 1,
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: 10, 
+          marginBottom: 30, 
+          maxHeight: 'calc(100vh - 200px)',
+          overflowY: 'auto'
+        }}>
           {leaderboard.map((item, idx) => (
             <div key={item.id} style={{
               background: '#fff',
@@ -2716,7 +2731,7 @@ const GameCanvas: React.FC = () => {
       position: 'relative', 
       width: '100%', 
       height: '100vh',
-      fontFamily: '"Pixelify Sans", Arial, sans-serif',
+      fontFamily: '"Play", Arial, sans-serif',
       background: 'transparent',
       zIndex: 1
     }}>
