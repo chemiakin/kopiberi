@@ -901,6 +901,53 @@ const GameCanvas: React.FC = () => {
     return () => window.removeEventListener('resize', setSafeAreaVariables);
   }, []);
 
+  // Добавляю meta-тег viewport для iOS
+  useEffect(() => {
+    if (!document.querySelector('meta[name="viewport"][content*="viewport-fit=cover"]')) {
+      const meta = document.createElement('meta');
+      meta.name = 'viewport';
+      meta.content = 'width=device-width, initial-scale=1, viewport-fit=cover';
+      document.head.appendChild(meta);
+    }
+    // Добавляю универсальные стили для устранения отступов и скролла
+    const style = document.createElement('style');
+    style.innerHTML = `
+      html, body, #root {
+        height: 100%;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0;
+        box-sizing: border-box;
+        background: transparent !important;
+        overflow: hidden !important;
+      }
+      #root {
+        min-height: 100dvh;
+        min-width: 100vw;
+        background: url('/assets/background.png') center/cover no-repeat fixed !important;
+      }
+      canvas {
+        display: block;
+        width: 100vw !important;
+        height: 100dvh !important;
+        max-width: 100vw !important;
+        max-height: 100dvh !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: transparent !important;
+        position: relative;
+        z-index: 2;
+      }
+      body {
+        overscroll-behavior-y: contain;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      if (style.parentNode) style.parentNode.removeChild(style);
+    };
+  }, []);
+
   // Таймер игры
   useEffect(() => {
     if (gameState !== 'playing') return;
