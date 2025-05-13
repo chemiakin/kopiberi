@@ -200,6 +200,16 @@ const PrizeList: React.FC<{ ticketsCount: number, setShowPrize100: (v: boolean) 
   );
 };
 
+// Добавляем интерфейс для Window
+declare global {
+  interface Window {
+    safeAreaInsets?: {
+      top: number;
+      bottom: number;
+    };
+  }
+}
+
 const GameCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
@@ -672,7 +682,7 @@ const GameCanvas: React.FC = () => {
 
       ctx.clearRect(0, 0, dimensions.width, dimensions.height);
 
-      // Отрисовка фона
+      // Отрисовка фона с учетом безопасных зон
       if (backgroundImage) {
         const scale = dimensions.height / backgroundImage.height;
         const width = backgroundImage.width * scale;
@@ -680,43 +690,27 @@ const GameCanvas: React.FC = () => {
         ctx.drawImage(backgroundImage, x, 0, width, dimensions.height);
       }
 
-      // Применяем свечение по краям экрана
-      if (screenGlow) {
-        ctx.save();
-        const gradient = ctx.createLinearGradient(0, 0, dimensions.width, 0);
-        gradient.addColorStop(0, screenGlow.color);
-        gradient.addColorStop(0.1, 'transparent');
-        gradient.addColorStop(0.9, 'transparent');
-        gradient.addColorStop(1, screenGlow.color);
-        
-        ctx.fillStyle = gradient;
-        ctx.globalAlpha = screenGlow.intensity * 0.5; // Уменьшаем прозрачность на 50%
-        ctx.fillRect(0, 0, dimensions.width, dimensions.height);
-        ctx.restore();
-      }
-
-      // Плавное обновление таймлайна
+      // Обновляем позицию таймлайна с учетом безопасных зон
+      const topSafeArea = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat') || '0');
       const targetTimeBarWidth = (timeLeft / 8) * dimensions.width;
       timeBarWidthRef.current += (targetTimeBarWidth - timeBarWidthRef.current) * 0.05;
       
       ctx.fillStyle = '#ddd';
-      ctx.fillRect(0, 0, dimensions.width, 10);
+      ctx.fillRect(0, topSafeArea, dimensions.width, 10);
       ctx.fillStyle = timeLeft > 2 ? '#4CAF50' : '#f44336';
-      ctx.fillRect(0, 0, timeBarWidthRef.current, 10);
+      ctx.fillRect(0, topSafeArea, timeBarWidthRef.current, 10);
 
-      // Обновляем позиции и вращение предметов
+      // Обновляем позиции предметов с учетом безопасных зон
       const updated = gameObjectsRef.current.map(obj => {
         let newX = obj.x;
         let newY = obj.y;
         let rotation = objectRotations[obj.id] || 0;
 
-        // Обновляем вращение только для не-наковальни
         if (obj.type !== 'anvil') {
           rotation += deltaTime * 0.001;
           setObjectRotations(prev => ({ ...prev, [obj.id]: rotation }));
         }
 
-        // Применяем эффект магнита к положительным предметам
         if (magnetEffect && !['anvil', 'puffer', 'sock', 'drop', 'magnet', 'shield'].includes(obj.type)) {
           const dx = basketX - obj.x;
           const dy = (dimensions.height - 80 * basketScale) - obj.y;
@@ -736,29 +730,19 @@ const GameCanvas: React.FC = () => {
         };
       }).filter(obj => {
         const basketHeight = 80 * basketScale;
-        if (obj.y + obj.height > dimensions.height - basketHeight) {
+        const safeAreaBottom = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sab') || '0');
+        if (obj.y + obj.height > dimensions.height - basketHeight - safeAreaBottom) {
           if (obj.x + obj.width > basketX && obj.x < basketX + 100 * basketScale) {
             handleCollision(obj);
             return false;
           }
           if (obj.y > dimensions.height) {
-            // Если предмет упал мимо корзины и это положительный предмет, и не во время дождя
             if (!['anvil', 'puffer', 'sock', 'drop', 'magnet', 'shield'].includes(obj.type) && !rainEffect) {
               setTimeLeft(prev => Math.max(0, prev - 2));
-              
-              // Сбрасываем предыдущий таймер если он есть
               if (damageTimeoutId) {
                 clearTimeout(damageTimeoutId);
               }
-              
-              // Устанавливаем эффекты
-              // setScreenGlow({ color: '#f44336', intensity: 1 });
-              // setScreenShake(true);
-              
-              // Устанавливаем новый таймер
               damageTimeoutId = window.setTimeout(() => {
-                // setScreenShake(false);
-                // setScreenGlow(null);
                 damageTimeoutId = null;
               }, 500);
             }
@@ -768,7 +752,7 @@ const GameCanvas: React.FC = () => {
         return true;
       });
 
-      // Обновляем состояние только если есть изменения
+      // Обновляем состояние
       if (JSON.stringify(updated) !== JSON.stringify(gameObjectsRef.current)) {
         gameObjectsRef.current = updated;
         setGameObjects(updated);
@@ -788,12 +772,14 @@ const GameCanvas: React.FC = () => {
         }
       });
 
+      // Отрисовка корзины с учетом безопасных зон
       if (images.basket) {
         const basketWidth = 100 * basketScale * (shieldEffect ? 1.5 : 1);
         const basketHeight = 80 * basketScale * (shieldEffect ? 1.5 : 1);
+        const safeAreaBottom = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sab') || '0');
         ctx.save();
         const basketCenterX = basketX + basketWidth / 2;
-        const basketY = dimensions.height - basketHeight - 40;
+        const basketY = dimensions.height - basketHeight - safeAreaBottom - 40;
         ctx.translate(basketCenterX, basketY + basketHeight / 2);
         ctx.rotate(basketTilt);
         ctx.drawImage(
@@ -806,13 +792,14 @@ const GameCanvas: React.FC = () => {
         ctx.restore();
       }
 
+      // Отрисовка счета с учетом безопасных зон
       ctx.save();
       ctx.font = '20px "Play", Arial, sans-serif';
       ctx.fillStyle = '#fff';
       ctx.textAlign = 'center';
-      ctx.fillText('Счёт', dimensions.width / 2, 45);
+      ctx.fillText('Счёт', dimensions.width / 2, topSafeArea + 45);
       ctx.font = 'bold 38px "Play", Arial, sans-serif';
-      ctx.fillText(`${score}`, dimensions.width / 2, 85);
+      ctx.fillText(`${score}`, dimensions.width / 2, topSafeArea + 85);
       ctx.restore();
 
       // FPS-трекер
@@ -825,7 +812,6 @@ const GameCanvas: React.FC = () => {
         lastFpsUpdate.current = now;
       }
 
-      // Внутри gameLoop, после всей отрисовки (перед requestAnimationFrame):
       ctx.save();
       ctx.globalAlpha = 0.12;
       ctx.font = '4px Arial, sans-serif';
@@ -847,18 +833,43 @@ const GameCanvas: React.FC = () => {
     };
   }, [dimensions, images, basketX, score, gameState, timeLeft, basketScale, slowEffect, magnetEffect, shieldEffect, screenGlow, objectRotations, backgroundImage, basketTilt]);
 
-  // Адаптивность canvas
+  // Обновляем useEffect для установки размеров canvas
   useEffect(() => {
     const updateDimensions = () => {
+      // Получаем безопасные зоны
+      const topSafeArea = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat') || '0');
+      const bottomSafeArea = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sab') || '0');
+      
+      // Вычисляем доступную высоту с учетом безопасных зон
+      const availableHeight = window.innerHeight - topSafeArea - bottomSafeArea;
+      
       setDimensions({
         width: window.innerWidth,
-        height: window.innerHeight
+        height: availableHeight
       });
     };
 
     updateDimensions();
     window.addEventListener('resize', updateDimensions);
     return () => window.removeEventListener('resize', updateDimensions);
+  }, []);
+
+  // Обновляем useEffect для установки CSS-переменных
+  useEffect(() => {
+    const setSafeAreaVariables = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+      
+      // Добавляем безопасные зоны
+      const topSafeArea = window.safeAreaInsets?.top || 0;
+      const bottomSafeArea = window.safeAreaInsets?.bottom || 0;
+      document.documentElement.style.setProperty('--sat', `${topSafeArea}px`);
+      document.documentElement.style.setProperty('--sab', `${bottomSafeArea}px`);
+    };
+
+    setSafeAreaVariables();
+    window.addEventListener('resize', setSafeAreaVariables);
+    return () => window.removeEventListener('resize', setSafeAreaVariables);
   }, []);
 
   // Таймер игры
@@ -2635,18 +2646,6 @@ const GameCanvas: React.FC = () => {
       loadTotalStats();
     }
   }, [gameState]);
-
-  // Добавляем useEffect для установки CSS-переменных
-  useEffect(() => {
-    const setSafeAreaVariables = () => {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
-    };
-
-    setSafeAreaVariables();
-    window.addEventListener('resize', setSafeAreaVariables);
-    return () => window.removeEventListener('resize', setSafeAreaVariables);
-  }, []);
 
   return (
     <div style={{ 
