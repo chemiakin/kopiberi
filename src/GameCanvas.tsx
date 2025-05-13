@@ -837,8 +837,8 @@ const GameCanvas: React.FC = () => {
   useEffect(() => {
     const updateDimensions = () => {
       // Получаем безопасные зоны
-      const topSafeArea = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat') || '0');
-      const bottomSafeArea = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sab') || '0');
+      // const topSafeArea = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat') || '0');
+      // const bottomSafeArea = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sab') || '0');
       
       // Вычисляем доступную высоту с учетом безопасных зон
       const availableHeight = window.innerHeight;
