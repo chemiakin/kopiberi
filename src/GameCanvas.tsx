@@ -235,7 +235,7 @@ const GameCanvas: React.FC = () => {
     const savedCard = localStorage.getItem('loyaltyCard');
     return savedCard ? JSON.parse(savedCard) : { number: '' };
   });
-  const [cardInput, setCardInput] = useState(['5', '1', '', '', '', '', '', '', '', '']);
+  const [cardInput, setCardInput] = useState(['7', '9', '', '', '', '', '', '', '', '', '']);
   const [rainEffect, setRainEffect] = useState(false);
   const [magnetEffect, setMagnetEffect] = useState(false);
   const [shieldEffect, setShieldEffect] = useState(false);
@@ -319,8 +319,6 @@ const GameCanvas: React.FC = () => {
   const [isLeaderboardLoading, setIsLeaderboardLoading] = useState(false);
   // Добавляю состояние для показа страницы приза 100 руб
   const [showPrize100, setShowPrize100] = useState(false);
-  // Добавляю состояние для страницы "Где найти номер карты"
-  const [showWhereCard, setShowWhereCard] = useState(false);
   // Добавляем новые состояния для админ-статистики
   const [adminStats, setAdminStats] = useState<{
     totalPlayers: number;
@@ -1043,7 +1041,7 @@ const GameCanvas: React.FC = () => {
     setCardInput(newInput);
 
     // Автоматически переходим к следующему полю
-    if (value && index < 9) {
+    if (value && index < 10) {
       const nextInput = document.querySelector(`input[data-index="${index + 1}"]`) as HTMLInputElement;
       if (nextInput) {
         nextInput.focus();
@@ -1133,7 +1131,7 @@ const GameCanvas: React.FC = () => {
   // handleLogout сбрасывает состояние
   const handleLogout = () => {
     setLoyaltyCard({ number: '' });
-    setCardInput(['5', '1', '', '', '', '', '', '', '', '']);
+    setCardInput(['7', '9', '', '', '', '', '', '', '', '', '']);
     setGameState('auth');
     setGameStats({
       gamesPlayed: 0,
@@ -1450,144 +1448,127 @@ const GameCanvas: React.FC = () => {
   };
 
   const renderAuth = () => (
-    showWhereCard ? renderWhereCard() : (
+    <div style={{
+      width: '90%',
+      maxWidth: '600px',
+      margin: '0 auto',
+      minHeight: '100dvh',
+      maxHeight: '100dvh',
+      overflowY: 'auto',
+      boxSizing: 'border-box',
+      padding: '40px 0',
+      textAlign: 'center',
+      zIndex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}>
+      <img src="/assets/brandlogo.png" alt="Логотип" style={{ width: 280, margin: '0 auto 0px auto', display: 'block' }} />
+      <img src="/assets/icon.png" alt="Иконка" style={{ width: 220, margin: '0 auto 24px auto', display: 'block' }} />
       <div style={{
-        width: '90%',
-        maxWidth: '600px',
-        margin: '0 auto',
-        minHeight: '100dvh',
-        maxHeight: '100dvh',
-        overflowY: 'auto',
-        boxSizing: 'border-box',
-        padding: '40px 0',
-        textAlign: 'center',
-        zIndex: 1,
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
+        gap: 20,
+        marginBottom: 15,
+        padding: 10,
+        background: 'rgba(255, 255, 255, 0.9)',
+        borderRadius: 10,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
       }}>
-        <img src="/assets/brandlogo.png" alt="Логотип" style={{ width: 280, margin: '0 auto 0px auto', display: 'block' }} />
-        <img src="/assets/icon.png" alt="Иконка" style={{ width: 220, margin: '0 auto 24px auto', display: 'block' }} />
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 20,
-          marginBottom: 15,
-          padding: 10,
-          background: 'rgba(255, 255, 255, 0.9)',
-          borderRadius: 10,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-        }}>
-          <img src="/assets/eggplant.png" alt="Баклажан" style={{ width: 40, height: 40, objectFit: 'contain' }} />
-          <div style={{ fontSize: 14, fontWeight: 600, textAlign: 'left', color: '#111' }}>
-            Дарим 50.000 баллов самым активным игрокам и раздаем подарки в игре!
-          </div>
+        <img src="/assets/eggplant.png" alt="Баклажан" style={{ width: 40, height: 40, objectFit: 'contain' }} />
+        <div style={{ fontSize: 14, fontWeight: 600, textAlign: 'left', color: '#111' }}>
+          Дарим 50.000 баллов самым активным игрокам и раздаем подарки в игре!
         </div>
-        <h2 style={{
-          fontSize: 'clamp(16px, 5vw, 16px)',
-          marginBottom: '10px',
-          wordBreak: 'break-word',
-          width: '100%',
-          textAlign: 'center',
-          color: '#fff'
-        }}>
-          Введите номер карты лояльности
-        </h2>
-        <div style={{
-          display: 'flex',
-          gap: 4,
-          justifyContent: 'center',
-          marginBottom: '20px',
-          flexWrap: 'nowrap',
-          width: '90vw',
-          maxWidth: 360,
-          minWidth: 240,
-          whiteSpace: 'nowrap',
-          alignItems: 'center',
-          textAlign: 'center'
-        }}>
-          {cardInput.map((digit, index) => (
-            <input
-              key={index}
-              data-index={index}
-              type="tel"
-              inputMode="numeric"
-              value={digit}
-              onChange={(e) => handleCardInput(index, e.target.value)}
-              style={{
-                width: '10%',
-                minWidth: 24,
-                maxWidth: 36,
-                height: 36,
-                fontSize: 16,
-                textAlign: 'center',
-                border: '2px solid #ccc',
-                borderRadius: '5px',
-                backgroundColor: index < 2 ? '#eee' : 'white',
-                cursor: index < 2 ? 'not-allowed' : 'text',
-                color: '#000',
-                padding: '0',
-                boxSizing: 'border-box'
-              }}
-              disabled={index < 2}
-              maxLength={1}
-            />
-          ))}
-        </div>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          marginBottom: 15,
-          padding: 10,
-          background: 'rgba(255, 255, 255, 0.9)',
-          borderRadius: 10,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-        }}>
-          <div style={{ fontSize: 14, fontWeight: 600, textAlign: 'left', color: '#111' }}>
-            Номер карты лояльности вы можете найти в приложении "Калина-Малина" в профиле
-          </div>
-          <button
-            onClick={() => setShowWhereCard(true)}
-            style={{
-              padding: '8px 18px',
-              fontSize: '14px',
-              backgroundColor: '#E50046',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              fontWeight: 700
-            }}
-          >
-            Где?
-          </button>
-        </div>
-        <button
-          onClick={() => {
-            handleButtonClick();
-            handleAuth();
-          }}
-          disabled={cardInput.some(digit => !digit)}
-          style={{
-            padding: '10px',
-            fontSize: '14px',
-            backgroundColor: cardInput.some(digit => !digit) ? '#ccc' : '#E50046',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: cardInput.some(digit => !digit) ? 'not-allowed' : 'pointer',
-            width: 'auto',
-            minWidth: '200px',
-            margin: '0 auto',
-            display: 'block'
-          }}
-        >
-          войти
-        </button>
       </div>
-    )
+      <h2 style={{
+        fontSize: 'clamp(16px, 5vw, 16px)',
+        marginBottom: '10px',
+        wordBreak: 'break-word',
+        width: '100%',
+        textAlign: 'center',
+        color: '#fff'
+      }}>
+        Введите номер телефона
+      </h2>
+      <div style={{
+        display: 'flex',
+        gap: 4,
+        justifyContent: 'center',
+        marginBottom: '20px',
+        flexWrap: 'nowrap',
+        width: '90vw',
+        maxWidth: 360,
+        minWidth: 240,
+        whiteSpace: 'nowrap',
+        alignItems: 'center',
+        textAlign: 'center'
+      }}>
+        {cardInput.map((digit, index) => (
+          <input
+            key={index}
+            data-index={index}
+            type="tel"
+            inputMode="numeric"
+            value={digit}
+            onChange={(e) => handleCardInput(index, e.target.value)}
+            style={{
+              width: '9%',
+              minWidth: 24,
+              maxWidth: 32,
+              height: 36,
+              fontSize: 16,
+              textAlign: 'center',
+              border: '2px solid #ccc',
+              borderRadius: '5px',
+              backgroundColor: index < 2 ? '#eee' : 'white',
+              cursor: index < 2 ? 'not-allowed' : 'text',
+              color: '#000',
+              padding: '0',
+              boxSizing: 'border-box'
+            }}
+            disabled={index < 2}
+            maxLength={1}
+          />
+        ))}
+      </div>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        marginBottom: 15,
+        padding: 10,
+        background: 'rgba(255, 255, 255, 0.9)',
+        borderRadius: 10,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+      }}>
+        <div style={{ fontSize: 14, fontWeight: 600, textAlign: 'left', color: '#111' }}>
+          Введите номер телефона в формате 79XXXXXXXXX
+        </div>
+      </div>
+      <button
+        onClick={() => {
+          handleButtonClick();
+          handleAuth();
+        }}
+        disabled={cardInput.some(digit => !digit)}
+        style={{
+          padding: '10px',
+          fontSize: '14px',
+          backgroundColor: cardInput.some(digit => !digit) ? '#ccc' : '#E50046',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: cardInput.some(digit => !digit) ? 'not-allowed' : 'pointer',
+          width: 'auto',
+          minWidth: '200px',
+          margin: '0 auto',
+          display: 'block'
+        }}
+      >
+        войти
+      </button>
+    </div>
   );
 
   // --- Страница 'Как играть' ---
@@ -2346,12 +2327,8 @@ const GameCanvas: React.FC = () => {
           
         if (score > prev.highScore) {
           updateAchievements(newStats);
-          
-          // Сохраняем в Firebase только если есть номер карты
-          if (loyaltyCard.number) {
-            saveStats(loyaltyCard.number, newStats);
-            saveAchievements(loyaltyCard.number, achievements);
-          }
+          // Сохраняем данные
+          saveGameData();
         }
         
         return newStats;
@@ -2360,6 +2337,12 @@ const GameCanvas: React.FC = () => {
   }, [gameState, score, loyaltyCard.number, achievements]);
 
   // --- Страница рейтинга ---
+  // Функция для маскирования номера
+  const maskNumber = (number: string) => {
+    if (number.length < 5) return number; // Если номер слишком короткий, возвращаем как есть
+    return `${number.slice(0, 2)}${'*'.repeat(number.length - 5)}${number.slice(-3)}`;
+  };
+
   const renderLeaderboard = () => {
     return (
       <div style={{
@@ -2422,7 +2405,7 @@ const GameCanvas: React.FC = () => {
                 alignItems: 'center',
                 justifyContent: 'space-between'
               }}>
-                <span>#{idx + 1} ID: {item.id}</span>
+                <span>#{idx + 1} {maskNumber(item.id)}</span>
                 <span>Рекорд: {item.score}</span>
               </div>
             ))
@@ -2533,48 +2516,6 @@ const GameCanvas: React.FC = () => {
       }
     }
   }, []);
-
-  // Добавляю компонент страницы приза 100 руб
-  const renderWhereCard = () => (
-    <div style={{
-      width: '90%',
-      maxWidth: '600px',
-      margin: '0 auto',
-      minHeight: '100dvh',
-      boxSizing: 'border-box',
-      padding: '40px 0',
-      textAlign: 'center',
-      zIndex: 1,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 16,
-      background: 'rgba(0,0,0,0.7)'
-    }}>
-      <h2 style={{ fontSize: 20, color: '#fff', marginBottom: 10 }}>Где найти номер карты лояльности?</h2>
-      <div style={{ fontSize: 16, color: '#fff', marginBottom: 10 }}>
-        Найти номер карты лояльности вы можете в приложении.<br />Откройте профиль и введите свой код, как на примере ниже
-      </div>
-      <img src="/assets/where.png" alt="Где найти номер карты" style={{ width: 260, maxWidth: '90vw', marginBottom: 20, borderRadius: 10, boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }} />
-      <button
-        onClick={() => setShowWhereCard(false)}
-        style={{
-          padding: '10px',
-          fontSize: '14px',
-          backgroundColor: '#E50046',
-          color: 'white',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer',
-          minWidth: 180,
-          fontWeight: 700
-        }}
-      >
-        Авторизоваться
-      </button>
-    </div>
-  );
 
   // Добавляем функцию для загрузки админ-статистики
   const loadAdminStats = async () => {
@@ -2754,6 +2695,77 @@ const GameCanvas: React.FC = () => {
 
     if (gameState === 'stats') {
       loadTotalStats();
+    }
+  }, [gameState]);
+
+  // Функция для сохранения данных с повторными попытками
+  const saveGameData = async (retryCount = 3) => {
+    if (!loyaltyCard.number) return;
+    
+    try {
+      // Сохраняем статистику
+      await saveStats(loyaltyCard.number, gameStats);
+      // Сохраняем достижения
+      await saveAchievements(loyaltyCard.number, achievements);
+      console.log('Данные успешно сохранены');
+    } catch (error) {
+      console.error('Ошибка при сохранении данных:', error);
+      if (retryCount > 0) {
+        console.log(`Повторная попытка сохранения. Осталось попыток: ${retryCount - 1}`);
+        // Ждем 1 секунду перед повторной попыткой
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return saveGameData(retryCount - 1);
+      }
+    }
+  };
+
+  // Обновляем useEffect для сохранения статистики
+  useEffect(() => {
+    if (gameState === 'result') {
+      // Сначала обновляем highScore
+      setGameStats(prev => {
+        const newStats = score > prev.highScore 
+          ? { ...prev, highScore: score }
+          : prev;
+          
+        if (score > prev.highScore) {
+          updateAchievements(newStats);
+          // Сохраняем данные
+          saveGameData();
+        }
+        
+        return newStats;
+      });
+    }
+  }, [gameState, score, loyaltyCard.number, achievements]);
+
+  // Добавляем обработчик перед уходом со страницы
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (gameState === 'result' && loyaltyCard.number) {
+        saveGameData();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [gameState, loyaltyCard.number, gameStats, achievements]);
+
+  // Добавляем сохранение при переходе между страницами
+  useEffect(() => {
+    if (gameState === 'result') {
+      const handleStateChange = () => {
+        saveGameData();
+      };
+
+      // Сохраняем при переходе на другие страницы
+      const cleanup = () => {
+        handleStateChange();
+      };
+
+      return cleanup;
     }
   }, [gameState]);
 
