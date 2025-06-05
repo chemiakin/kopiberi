@@ -89,10 +89,37 @@ async function retryOperation<T>(operation: () => Promise<T>, maxRetries = 3): P
 
 // Сохранить статистику игрока
 export async function saveStats(cardNumber: string, stats: GameStats): Promise<void> {
-  if (!db) throw new Error('Firestore не инициализирован');
-  return retryOperation(async () => {
-    await setDoc(doc(db, 'stats', cardNumber), stats);
-  });
+  if (!db) {
+    console.error('Firestore не инициализирован');
+    throw new Error('Firestore не инициализирован');
+  }
+  
+  try {
+    await retryOperation(async () => {
+      await setDoc(doc(db, 'stats', cardNumber), stats);
+    });
+  } catch (error) {
+    console.error('Критическая ошибка при сохранении статистики:', error);
+    throw error;
+  }
+}
+
+// Функция верификации сохранения
+export async function verifySave(cardNumber: string, expectedStats: GameStats): Promise<boolean> {
+  try {
+    const savedStats = await loadStats(cardNumber);
+    if (!savedStats || savedStats.highScore !== expectedStats.highScore) {
+      console.error('Ошибка верификации сохранения:', {
+        expected: expectedStats,
+        actual: savedStats
+      });
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('Ошибка при верификации сохранения:', error);
+    return false;
+  }
 }
 
 // Загрузить статистику игрока

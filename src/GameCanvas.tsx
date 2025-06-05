@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { loadStats, saveStats, loadLoyaltyCard, saveLoyaltyCard, loadAchievements, saveAchievements } from './services/firebase';
+import { loadStats, saveStats, loadLoyaltyCard, saveLoyaltyCard, loadAchievements, saveAchievements, verifySave } from './services/firebase';
 import { collection, getDocs, query, orderBy, limit, getCountFromServer, getDoc, doc, where } from 'firebase/firestore';
 import { db } from './services/firebase';
 
@@ -1057,38 +1057,21 @@ const GameCanvas: React.FC = () => {
         const saved = localStorage.getItem('loyaltyCard');
         if (saved) card = JSON.parse(saved);
       }
-      const loadedCard = await loadLoyaltyCard(card.number);
-      if (!loadedCard) {
-        await saveLoyaltyCard(card.number, card);
-        setLoyaltyCard(card);
-      } else {
-        setLoyaltyCard(loadedCard);
-      }
       
-      const stats = await loadStats(card.number);
-      if (!stats) {
-        const newStats = {
-          gamesPlayed: 0,
-          totalPlayTime: 0,
-          deathsByAnvil: 0,
-          itemsCaught: {},
-          timeUnderSlowEffect: 0,
-          highScore: 0
-        };
-        await saveStats(card.number, newStats);
-        setGameStats(newStats);
-      } else {
-        setGameStats(stats);
-      }
-      
-      const ach = await loadAchievements(card.number);
-      if (!ach) {
-        await saveAchievements(card.number, achievements);
-        setAchievements(achievements);
-      } else {
-        setAchievements(ach);
+      if (card.number) {
+        const loadedCard = await loadLoyaltyCard(card.number);
+        if (!loadedCard) {
+          await saveLoyaltyCard(card.number, card);
+          setLoyaltyCard(card);
+        } else {
+          setLoyaltyCard(loadedCard);
+        }
+        
+        // Загружаем данные с Firebase
+        await loadGameData();
       }
     }
+    
     if (loyaltyCard.number) fetchData();
   }, [loyaltyCard.number]);
 
@@ -2707,43 +2690,91 @@ const GameCanvas: React.FC = () => {
       await saveStats(loyaltyCard.number, gameStats);
       // Сохраняем достижения
       await saveAchievements(loyaltyCard.number, achievements);
-      console.log('Данные успешно сохранены');
+      
+      // Верифицируем сохранение
+      const isVerified = await verifySave(loyaltyCard.number, gameStats);
+      if (!isVerified && retryCount > 0) {
+        console.warn('Верификация сохранения не удалась, повторная попытка...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return saveGameData(retryCount - 1);
+      }
+      
+      // После успешного сохранения обновляем локальное хранилище
+      localStorage.setItem(`stats_${loyaltyCard.number}`, JSON.stringify(gameStats));
+      console.log('Данные успешно сохранены и верифицированы');
     } catch (error) {
       console.error('Ошибка при сохранении данных:', error);
       if (retryCount > 0) {
         console.log(`Повторная попытка сохранения. Осталось попыток: ${retryCount - 1}`);
-        // Ждем 1 секунду перед повторной попыткой
         await new Promise(resolve => setTimeout(resolve, 1000));
         return saveGameData(retryCount - 1);
       }
     }
   };
 
+  // Функция для загрузки данных с Firebase
+  const loadGameData = async () => {
+    if (!loyaltyCard.number) return;
+    
+    try {
+      const stats = await loadStats(loyaltyCard.number);
+      if (stats) {
+        setGameStats(stats);
+        localStorage.setItem(`stats_${loyaltyCard.number}`, JSON.stringify(stats));
+      }
+      
+      const ach = await loadAchievements(loyaltyCard.number);
+      if (ach) {
+        setAchievements(ach);
+      }
+    } catch (error) {
+      console.error('Ошибка при загрузке данных:', error);
+    }
+  };
+
   // Обновляем useEffect для сохранения статистики
   useEffect(() => {
     if (gameState === 'result') {
-      // Сначала обновляем highScore
       setGameStats(prev => {
-        const newStats = score > prev.highScore 
-          ? { ...prev, highScore: score }
-          : prev;
-          
         if (score > prev.highScore) {
-          updateAchievements(newStats);
-          // Сохраняем данные
+          const newStats = { ...prev, highScore: score };
+          // Немедленно сохраняем при обновлении рекорда
           saveGameData();
+          return newStats;
         }
-        
-        return newStats;
+        return prev;
       });
     }
-  }, [gameState, score, loyaltyCard.number, achievements]);
+  }, [gameState, score]);
+
+  // Добавляем периодическое обновление данных
+  useEffect(() => {
+    if (loyaltyCard.number) {
+      // Загружаем данные при монтировании
+      loadGameData();
+      
+      // Устанавливаем интервал обновления каждые 30 секунд
+      const interval = setInterval(() => {
+        loadGameData();
+      }, 30000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [loyaltyCard.number]);
 
   // Добавляем обработчик перед уходом со страницы
   useEffect(() => {
-    const handleBeforeUnload = () => {
+    const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
       if (gameState === 'result' && loyaltyCard.number) {
-        saveGameData();
+        // Пытаемся синхронно сохранить перед уходом
+        try {
+          await saveGameData();
+        } catch (error) {
+          console.error('Ошибка при сохранении перед уходом:', error);
+          // Показываем предупреждение пользователю
+          e.preventDefault();
+          e.returnValue = '';
+        }
       }
     };
 
@@ -2756,16 +2787,17 @@ const GameCanvas: React.FC = () => {
   // Добавляем сохранение при переходе между страницами
   useEffect(() => {
     if (gameState === 'result') {
-      const handleStateChange = () => {
-        saveGameData();
+      const handleStateChange = async () => {
+        try {
+          await saveGameData();
+        } catch (error) {
+          console.error('Ошибка при сохранении при смене состояния:', error);
+        }
       };
 
-      // Сохраняем при переходе на другие страницы
-      const cleanup = () => {
+      return () => {
         handleStateChange();
       };
-
-      return cleanup;
     }
   }, [gameState]);
 
