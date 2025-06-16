@@ -509,7 +509,7 @@ const GameCanvas: React.FC = () => {
       img: '/assets/kebab.png',
       desc: 'Сочный и ароматный. Даёт 20 очков и 2 секунды',
       chance: 0.20,
-      points: 10000,
+      points: 20,
       time: 2,
       floatText: '+20'
     },
