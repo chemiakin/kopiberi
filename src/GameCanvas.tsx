@@ -509,7 +509,7 @@ const GameCanvas: React.FC = () => {
       img: '/assets/kebab.png',
       desc: 'Сочный и ароматный. Даёт 20 очков и 2 секунды',
       chance: 0.20,
-      points: 20,
+      points: 10000,
       time: 2,
       floatText: '+20'
     },
@@ -2311,7 +2311,7 @@ const GameCanvas: React.FC = () => {
         if (score > prev.highScore) {
           updateAchievements(newStats);
           // Сохраняем данные
-          saveGameData();
+          saveGameDataSync();
         }
         
         return newStats;
@@ -2681,54 +2681,20 @@ const GameCanvas: React.FC = () => {
     }
   }, [gameState]);
 
-  // Функция для сохранения данных с повторными попытками
-  const saveGameData = async (retryCount = 3) => {
+  // Функция для синхронного сохранения данных
+  const saveGameDataSync = async () => {
     if (!loyaltyCard.number) return;
     
     try {
-      // Сохраняем статистику
+      // Сначала сохраняем в Firebase
       await saveStats(loyaltyCard.number, gameStats);
-      // Сохраняем достижения
       await saveAchievements(loyaltyCard.number, achievements);
       
-      // Верифицируем сохранение
-      const isVerified = await verifySave(loyaltyCard.number, gameStats);
-      if (!isVerified && retryCount > 0) {
-        console.warn('Верификация сохранения не удалась, повторная попытка...');
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        return saveGameData(retryCount - 1);
-      }
-      
-      // После успешного сохранения обновляем локальное хранилище
+      // После успешного сохранения в Firebase, обновляем localStorage
       localStorage.setItem(`stats_${loyaltyCard.number}`, JSON.stringify(gameStats));
-      console.log('Данные успешно сохранены и верифицированы');
+      console.log('Данные успешно сохранены');
     } catch (error) {
       console.error('Ошибка при сохранении данных:', error);
-      if (retryCount > 0) {
-        console.log(`Повторная попытка сохранения. Осталось попыток: ${retryCount - 1}`);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        return saveGameData(retryCount - 1);
-      }
-    }
-  };
-
-  // Функция для загрузки данных с Firebase
-  const loadGameData = async () => {
-    if (!loyaltyCard.number) return;
-    
-    try {
-      const stats = await loadStats(loyaltyCard.number);
-      if (stats) {
-        setGameStats(stats);
-        localStorage.setItem(`stats_${loyaltyCard.number}`, JSON.stringify(stats));
-      }
-      
-      const ach = await loadAchievements(loyaltyCard.number);
-      if (ach) {
-        setAchievements(ach);
-      }
-    } catch (error) {
-      console.error('Ошибка при загрузке данных:', error);
     }
   };
 
@@ -2739,7 +2705,7 @@ const GameCanvas: React.FC = () => {
         if (score > prev.highScore) {
           const newStats = { ...prev, highScore: score };
           // Немедленно сохраняем при обновлении рекорда
-          saveGameData();
+          saveGameDataSync();
           return newStats;
         }
         return prev;
@@ -2747,7 +2713,7 @@ const GameCanvas: React.FC = () => {
     }
   }, [gameState, score]);
 
-  // Добавляем периодическое обновление данных
+  // Обновляем useEffect для периодического обновления данных
   useEffect(() => {
     if (loyaltyCard.number) {
       // Загружаем данные при монтировании
@@ -2762,13 +2728,13 @@ const GameCanvas: React.FC = () => {
     }
   }, [loyaltyCard.number]);
 
-  // Добавляем обработчик перед уходом со страницы
+  // Обновляем обработчик перед уходом со страницы
   useEffect(() => {
     const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
       if (gameState === 'result' && loyaltyCard.number) {
         // Пытаемся синхронно сохранить перед уходом
         try {
-          await saveGameData();
+          await saveGameDataSync();
         } catch (error) {
           console.error('Ошибка при сохранении перед уходом:', error);
           // Показываем предупреждение пользователю
@@ -2789,7 +2755,7 @@ const GameCanvas: React.FC = () => {
     if (gameState === 'result') {
       const handleStateChange = async () => {
         try {
-          await saveGameData();
+          await saveGameDataSync();
         } catch (error) {
           console.error('Ошибка при сохранении при смене состояния:', error);
         }
@@ -2800,6 +2766,26 @@ const GameCanvas: React.FC = () => {
       };
     }
   }, [gameState]);
+
+  // Функция для загрузки данных с Firebase
+  const loadGameData = async () => {
+    if (!loyaltyCard.number) return;
+    
+    try {
+      const stats = await loadStats(loyaltyCard.number);
+      if (stats) {
+        setGameStats(stats);
+        localStorage.setItem(`stats_${loyaltyCard.number}`, JSON.stringify(stats));
+      }
+      
+      const ach = await loadAchievements(loyaltyCard.number);
+      if (ach) {
+        setAchievements(ach);
+      }
+    } catch (error) {
+      console.error('Ошибка при загрузке данных:', error);
+    }
+  };
 
   return (
     <div style={{ 
