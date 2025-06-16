@@ -2690,11 +2690,24 @@ const GameCanvas: React.FC = () => {
       await saveStats(loyaltyCard.number, gameStats);
       await saveAchievements(loyaltyCard.number, achievements);
       
+      // Проверяем корректность сохранения
+      const isVerified = await verifySave(loyaltyCard.number, gameStats);
+      if (!isVerified) {
+        console.error('Ошибка верификации сохранения, пробуем еще раз...');
+        // Повторная попытка сохранения
+        await saveStats(loyaltyCard.number, gameStats);
+        const secondVerification = await verifySave(loyaltyCard.number, gameStats);
+        if (!secondVerification) {
+          throw new Error('Не удалось сохранить данные после повторной попытки');
+        }
+      }
+      
       // После успешного сохранения в Firebase, обновляем localStorage
       localStorage.setItem(`stats_${loyaltyCard.number}`, JSON.stringify(gameStats));
-      console.log('Данные успешно сохранены');
+      console.log('Данные успешно сохранены и верифицированы');
     } catch (error) {
       console.error('Ошибка при сохранении данных:', error);
+      throw error; // Пробрасываем ошибку дальше для обработки
     }
   };
 
