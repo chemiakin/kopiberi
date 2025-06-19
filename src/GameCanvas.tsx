@@ -2302,22 +2302,51 @@ const GameCanvas: React.FC = () => {
   // --- Исправление highScore и сохранение статистики ---
   useEffect(() => {
     if (gameState === 'result') {
-      // Сначала обновляем highScore
       setGameStats(prev => {
-        const newStats = score > prev.highScore 
-          ? { ...prev, highScore: score }
-          : prev;
-          
         if (score > prev.highScore) {
+          const newStats = { ...prev, highScore: score };
           updateAchievements(newStats);
-          // Сохраняем данные
-          saveGameDataSync();
+          return newStats;
         }
-        
-        return newStats;
+        return prev;
       });
     }
   }, [gameState, score, loyaltyCard.number, achievements]);
+
+  // Функция для синхронного сохранения данных
+  const saveGameDataSync = async () => {
+    if (!loyaltyCard.number) return;
+    try {
+      await saveStats(loyaltyCard.number, gameStats);
+      await saveAchievements(loyaltyCard.number, achievements);
+      const isVerified = await verifySave(loyaltyCard.number, gameStats);
+      if (!isVerified) {
+        console.error('Ошибка верификации сохранения, пробуем еще раз...');
+        await saveStats(loyaltyCard.number, gameStats);
+        const secondVerification = await verifySave(loyaltyCard.number, gameStats);
+        if (!secondVerification) {
+          throw new Error('Не удалось сохранить данные после повторной попытки');
+        }
+      }
+      localStorage.setItem(`stats_${loyaltyCard.number}`, JSON.stringify(gameStats));
+      console.log('Данные успешно сохранены и верифицированы');
+    } catch (error) {
+      console.error('Ошибка при сохранении данных:', error);
+      throw error;
+    }
+  };
+
+  // Новый useEffect: сохраняем только когда highScore обновился и мы на экране результата
+  const prevHighScoreRef = useRef(gameStats.highScore);
+  useEffect(() => {
+    if (
+      gameState === 'result' &&
+      gameStats.highScore > (prevHighScoreRef.current || 0)
+    ) {
+      saveGameDataSync();
+      prevHighScoreRef.current = gameStats.highScore;
+    }
+  }, [gameStats.highScore, gameState]);
 
   // --- Страница рейтинга ---
   // Функция для маскирования номера
@@ -2680,36 +2709,6 @@ const GameCanvas: React.FC = () => {
       loadTotalStats();
     }
   }, [gameState]);
-
-  // Функция для синхронного сохранения данных
-  const saveGameDataSync = async () => {
-    if (!loyaltyCard.number) return;
-    
-    try {
-      // Сначала сохраняем в Firebase
-      await saveStats(loyaltyCard.number, gameStats);
-      await saveAchievements(loyaltyCard.number, achievements);
-      
-      // Проверяем корректность сохранения
-      const isVerified = await verifySave(loyaltyCard.number, gameStats);
-      if (!isVerified) {
-        console.error('Ошибка верификации сохранения, пробуем еще раз...');
-        // Повторная попытка сохранения
-        await saveStats(loyaltyCard.number, gameStats);
-        const secondVerification = await verifySave(loyaltyCard.number, gameStats);
-        if (!secondVerification) {
-          throw new Error('Не удалось сохранить данные после повторной попытки');
-        }
-      }
-      
-      // После успешного сохранения в Firebase, обновляем localStorage
-      localStorage.setItem(`stats_${loyaltyCard.number}`, JSON.stringify(gameStats));
-      console.log('Данные успешно сохранены и верифицированы');
-    } catch (error) {
-      console.error('Ошибка при сохранении данных:', error);
-      throw error; // Пробрасываем ошибку дальше для обработки
-    }
-  };
 
   // Обновляем useEffect для сохранения статистики
   useEffect(() => {
