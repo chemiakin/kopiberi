@@ -2793,10 +2793,12 @@ const GameCanvas: React.FC = () => {
       console.log('[loadGameData] Загружено из Firebase:', stats);
       if (stats) {
         setGameStats(prev => {
-          console.log('[setGameStats в loadGameData] Было:', prev, 'Станет:', stats);
-          return stats;
+          const newHighScore = Math.max(prev.highScore, stats.highScore || 0);
+          const mergedStats = { ...prev, ...stats, highScore: newHighScore };
+          console.log('[setGameStats в loadGameData] Было:', prev, 'Станет:', mergedStats);
+          localStorage.setItem(`stats_${loyaltyCard.number}`, JSON.stringify(mergedStats));
+          return mergedStats;
         });
-        localStorage.setItem(`stats_${loyaltyCard.number}`, JSON.stringify(stats));
       }
       const ach = await loadAchievements(loyaltyCard.number);
       if (ach) {

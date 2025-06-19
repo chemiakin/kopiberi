@@ -104,6 +104,13 @@ export async function saveStats(cardNumber: string, stats: GameStats): Promise<v
     highScore: stats.highScore || 0
   };
 
+  // Проверяем текущий рекорд в базе
+  const current = await loadStats(cardNumber);
+  if (current && (current.highScore || 0) > fullStats.highScore) {
+    console.log('[saveStats] Не сохраняем, т.к. в базе рекорд выше:', current.highScore, '>=', fullStats.highScore);
+    return;
+  }
+
   try {
     await retryOperation(async () => {
       await setDoc(doc(db, 'stats', cardNumber), fullStats);
