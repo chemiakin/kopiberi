@@ -371,10 +371,14 @@ const GameCanvas: React.FC = () => {
   const startGame = () => {
     resetGame();
     setGameState('playing');
-    setGameStats(prev => ({
-      ...prev,
-      gamesPlayed: prev.gamesPlayed + 1
-    }));
+    setGameStats(prev => {
+      const newStats = {
+        ...prev,
+        gamesPlayed: prev.gamesPlayed + 1
+      };
+      console.log('[setGameStats в startGame] Было:', prev, 'Станет:', newStats);
+      return newStats;
+    });
   };
 
   // Обновление достижений
@@ -1181,6 +1185,7 @@ const GameCanvas: React.FC = () => {
                 deathsByAnvil: prev.deathsByAnvil + 1,
                 highScore: Math.max(prev.highScore, score)
               };
+              console.log('[setGameStats в useEffect (result)] Было:', prev, 'Станет:', newStats);
               updateAchievements(newStats);
               return newStats;
             });
@@ -2305,6 +2310,7 @@ const GameCanvas: React.FC = () => {
       setGameStats(prev => {
         if (score > prev.highScore) {
           const newStats = { ...prev, highScore: score };
+          console.log('[setGameStats в useEffect (result)] Было:', prev, 'Станет:', newStats);
           updateAchievements(newStats);
           return newStats;
         }
@@ -2782,14 +2788,16 @@ const GameCanvas: React.FC = () => {
   // Функция для загрузки данных с Firebase
   const loadGameData = async () => {
     if (!loyaltyCard.number) return;
-    
     try {
       const stats = await loadStats(loyaltyCard.number);
+      console.log('[loadGameData] Загружено из Firebase:', stats);
       if (stats) {
-        setGameStats(stats);
+        setGameStats(prev => {
+          console.log('[setGameStats в loadGameData] Было:', prev, 'Станет:', stats);
+          return stats;
+        });
         localStorage.setItem(`stats_${loyaltyCard.number}`, JSON.stringify(stats));
       }
-      
       const ach = await loadAchievements(loyaltyCard.number);
       if (ach) {
         setAchievements(ach);

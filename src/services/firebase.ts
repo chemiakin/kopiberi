@@ -93,10 +93,20 @@ export async function saveStats(cardNumber: string, stats: GameStats): Promise<v
     console.error('Firestore не инициализирован');
     throw new Error('Firestore не инициализирован');
   }
-  
+
+  // Гарантируем полную структуру объекта
+  const fullStats: GameStats = {
+    gamesPlayed: stats.gamesPlayed || 0,
+    totalPlayTime: stats.totalPlayTime || 0,
+    deathsByAnvil: stats.deathsByAnvil || 0,
+    itemsCaught: stats.itemsCaught || {},
+    timeUnderSlowEffect: stats.timeUnderSlowEffect || 0,
+    highScore: stats.highScore || 0
+  };
+
   try {
     await retryOperation(async () => {
-      await setDoc(doc(db, 'stats', cardNumber), stats);
+      await setDoc(doc(db, 'stats', cardNumber), fullStats);
     });
   } catch (error) {
     console.error('Критическая ошибка при сохранении статистики:', error);
